@@ -1,0 +1,12 @@
+services:
+  network-base-config:
+    networks:
+      - quizguru
+
+  microservice-base-config:
+    extends:
+      service: network-base-config
+    deploy:
+      resources:
+        limit:
+          memory: 500M

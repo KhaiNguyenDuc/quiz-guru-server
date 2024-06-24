@@ -1,0 +1,120 @@
+version: '1.0'
+
+services:
+  config-server:
+    image: "quizguru/configserver:1.0"
+    container_name: configserver-ms
+    build:
+      context: configserver
+      dockerfile: Dockerfile
+    ports:
+      - "8888:8888"
+    healthcheck:
+      test: "curl --fail --silent localhost:8888/actuator/health/readiness | grep UP || exit 1"
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    extends:
+      file: common-service.yml
+      service: microservice-base-config
+
+  eureka-server:
+    image: "quizguru/eureka:1.0"
+    container_name: eureka-ms
+    build:
+      context: eureka
+      dockerfile: Dockerfile
+    ports:
+      - "8761:8761"
+    healthcheck:
+      test: "curl --fail --silent localhost:8761/actuator/health/readiness | grep UP || exit 1"
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    depends_on:
+      - config-server
+    extends:
+      file: common-service.yml
+      service: microservice-base-config
+
+  gateway-server:
+    image: "quizguru/gateway:1.0"
+    container_name: gateway-ms
+    build:
+      context: gateway
+      dockerfile: Dockerfile
+    ports:
+      - "8072:8072"
+    healthcheck:
+      test: "curl --fail --silent localhost:8072/actuator/health/readiness | grep UP || exit 1"
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    depends_on:
+      - eureka-server
+    extends:
+      file: common-service.yml
+      service: microservice-base-config
+
+  context-server:
+    image: "quizguru/context:1.0"
+    container_name: context-ms
+    build:
+      context: contexts
+      dockerfile: Dockerfile
+    ports:
+      - "8083:8083"
+    healthcheck:
+      test: "curl --fail --silent localhost:8083/actuator/health/readiness | grep UP || exit 1"
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    depends_on:
+      - eureka-server
+    extends:
+      file: common-service.yml
+      service: microservice-base-config
+
+#  account-server:
+#    build:
+#      context: accounts
+#      dockerfile: Dockerfile
+#    ports:
+#      - "8761:8761"
+#    depends_on:
+#      - eureka-server
+#    networks:
+#      - quizguru
+#
+#  problem-server:
+#    build:
+#      context: problems
+#      dockerfile: Dockerfile
+#    ports:
+#      - "8082:8082"
+#    depends_on:
+#      - eureka-server
+#    networks:
+#      - quizguru
+#
+#  submit-server:
+#    build:
+#      context: accounts
+#      dockerfile: Dockerfile
+#    ports:
+#      - "8084:8084"
+#    depends_on:
+#      - eureka-server
+#    networks:
+#      - quizguru
+#
+
+networks:
+  quizguru:
+    driver: "bridge"
+
+

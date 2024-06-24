@@ -1,0 +1,30 @@
+server:
+  port: 8888
+spring:
+  application:
+    name: configserver
+  cloud:
+    config:
+      server:
+        git:
+          uri: https://github.com/KhaiNguyenDuc/quiz-guru-config
+          timeout: 2
+          cloneOnStart: true
+          defaultLabel: main
+          searchPaths: '{application}'
+          force-pull: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  health:
+    readiness-state:
+      enabled: true
+    liveness-state:
+      enabled: true
+  endpoint:
+    health:
+      probes:
+        enabled: true

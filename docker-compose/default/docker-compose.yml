@@ -1,0 +1,148 @@
+version: '1.0'
+
+services:
+  config-server:
+    image: "quizguru/configserver:1.0"
+    container_name: configserver-ms
+    build:
+      context: ../../configserver
+      dockerfile: Dockerfile
+    ports:
+      - "8888:8888"
+    healthcheck:
+      test: "wget -qO- http://localhost:8888/actuator/health/readiness | grep UP || exit 1"
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    extends:
+      file: common-service.yml
+      service: microservice-base-config
+
+  eureka-server:
+    image: "quizguru/eureka:1.0"
+    container_name: eureka-ms
+    build:
+      context: ../../eureka
+      dockerfile: Dockerfile
+    ports:
+      - "8761:8761"
+    healthcheck:
+      test: "wget -qO- http://localhost:8761/actuator/health/readiness | grep UP || exit 1"
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    depends_on:
+      config-server:
+        condition: service_healthy
+    extends:
+      file: common-service.yml
+      service: microservice-configserver-config
+
+  gateway-server:
+    image: "quizguru/gateway:1.0"
+    container_name: gateway-ms
+    build:
+      context: ../../gateway
+      dockerfile: Dockerfile
+    ports:
+      - "8072:8072"
+    healthcheck:
+      test: "wget -qO- http://localhost:8072/actuator/health/readiness | grep UP || exit 1"
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    depends_on:
+      config-server:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+    extends:
+      file: common-service.yml
+      service: microservice-eureka-config
+
+  context-server:
+    image: "quizguru/context:1.0"
+    container_name: context-ms
+    build:
+      context: ../../contexts
+      dockerfile: Dockerfile
+    ports:
+      - "8083:8083"
+    healthcheck:
+      test: "wget -qO- http://localhost:8083/actuator/health/readiness | grep UP || exit 1"
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    depends_on:
+      config-server:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+    extends:
+      file: common-service.yml
+      service: microservice-eureka-config
+
+  account-server:
+    build:
+      context: ../../accounts
+      dockerfile: Dockerfile
+    ports:
+      - "8762:8762"
+    healthcheck:
+      test: "wget -qO- http://localhost:8762/actuator/health/readiness | grep UP || exit 1"
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+    extends:
+      file: common-service.yml
+      service: microservice-eureka-config
+
+  problem-server:
+    build:
+      context: ../../problems
+      dockerfile: Dockerfile
+    ports:
+      - "8082:8082"
+    healthcheck:
+      test: "wget -qO- http://localhost:8082/actuator/health/readiness | grep UP || exit 1"
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+    extends:
+      file: common-service.yml
+      service: microservice-eureka-config
+
+  submit-server:
+    build:
+      context: ../../submits
+      dockerfile: Dockerfile
+    ports:
+      - "8084:8084"
+    healthcheck:
+      test: "wget -qO- http://localhost:8084/actuator/health/readiness | grep UP || exit 1"
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+    extends:
+      file: common-service.yml
+      service: microservice-eureka-config
+
+networks:
+  quizguru:
+    driver: "bridge"
