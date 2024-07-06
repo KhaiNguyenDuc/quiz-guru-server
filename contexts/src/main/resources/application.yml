@@ -3,3 +3,11 @@ spring:
     name: contexts
   config:
     import: optional:configserver:http://localhost:8888
+
+amqp:
+  exchanges:
+    internal: internal.exchange
+  queues:
+    generation: generation.queue
+  routing-keys:
+    internal-generation: internal.generation.routing-key

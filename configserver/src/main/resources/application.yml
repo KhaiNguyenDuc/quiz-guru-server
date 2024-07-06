@@ -28,3 +28,6 @@ management:
     health:
       probes:
         enabled: true
+
+encrypt:
+  key: UEGFJBAX2189173JAD#$C8Q237LSV2@

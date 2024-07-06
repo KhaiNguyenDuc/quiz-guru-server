@@ -1,0 +1,102 @@
+package com.quizguru.auth.service.impl;
+
+import com.quizguru.auth.dto.request.LoginCredentials;
+import com.quizguru.auth.dto.request.RegisterCredentials;
+import com.quizguru.auth.dto.response.RegisterResponse;
+import com.quizguru.auth.dto.response.TokenResponse;
+import com.quizguru.auth.dto.response.TokenValidationResponse;
+import com.quizguru.auth.exception.ResourceExistException;
+import com.quizguru.auth.exception.TokenValidationException;
+import com.quizguru.auth.exception.UnAuthorizeException;
+import com.quizguru.auth.jwt.JwtTokenProvider;
+import com.quizguru.auth.mapper.UserMapper;
+import com.quizguru.auth.model.RefreshToken;
+import com.quizguru.auth.model.Role;
+import com.quizguru.auth.model.User;
+import com.quizguru.auth.model.UserPrincipal;
+import com.quizguru.auth.model.enums.RoleName;
+import com.quizguru.auth.repository.RoleRepository;
+import com.quizguru.auth.repository.UserRepository;
+import com.quizguru.auth.service.AuthService;
+import com.quizguru.auth.service.RefreshTokenService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+@Service
+@RequiredArgsConstructor
+public class AuthServiceImpl implements AuthService {
+
+    private final JwtTokenProvider tokenProvider;
+    private final AuthenticationManager authManager;
+    private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+    private final PasswordEncoder encoder;
+    private final RefreshTokenService refreshTokenService;
+    @Override
+    public TokenValidationResponse validateJwtToken(String token) {
+        throw new TokenValidationException("Invalid token: ");
+//        tokenProvider.validateToken(token); // throw exception if not valid
+//        String userId = tokenProvider.getUserIdFromJwt(token);
+//        User user = userRepository.findById(userId)
+//                .orElseThrow(() -> new UnAuthorizeException("Not found user with id: "+ userId));
+//        Set<String> userAuthorities = user.getRoles().stream()
+//                .map(r -> "ROLE_" + r.getName().toString())
+//                .collect(Collectors.toSet());
+//
+//        return TokenValidationResponse.builder()
+//                .userId(userId)
+//                .userAuthorities(userAuthorities)
+//                .build();
+    }
+
+    @Override
+    public TokenResponse authenticate(LoginCredentials loginCredentials) {
+
+        UsernamePasswordAuthenticationToken token =
+                new UsernamePasswordAuthenticationToken(loginCredentials.username(), loginCredentials.password());
+        Authentication auth = authManager.authenticate(token);
+        String jwt = tokenProvider.generateToken(auth);
+
+        UserPrincipal userDetails = (UserPrincipal) auth.getPrincipal();
+        RefreshToken refreshToken = refreshTokenService.generateRefreshToken(userDetails.getId());
+        return TokenResponse.builder()
+                .accessToken(jwt)
+                .refreshToken(refreshToken.getToken())
+                .build();
+    }
+
+
+    @Override
+    public RegisterResponse register(RegisterCredentials registerCredentials) {
+
+        if(userRepository.existsByEmail(registerCredentials.email())){
+            throw new ResourceExistException("Email already exist");
+        }
+        return createUser(registerCredentials);
+    }
+
+    private RegisterResponse createUser(RegisterCredentials registerCredentials){
+
+        String encodedPassword = encoder.encode(registerCredentials.password());
+
+        Role role = roleRepository.findByName(RoleName.USER);
+
+        User user = User.builder()
+                .email(registerCredentials.email())
+                .username(registerCredentials.username())
+                .password(encodedPassword)
+                .roles(List.of(role))
+                .build();
+
+        User userSaved = userRepository.save(user);
+        return UserMapper.userToRegisterResponse(userSaved);
+    }
+}

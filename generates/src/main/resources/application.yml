@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: generates
+  config:
+    import: optional:configserver:http://localhost:8888
+
+amqp:
+  queues:
+    generation: generation.queue
