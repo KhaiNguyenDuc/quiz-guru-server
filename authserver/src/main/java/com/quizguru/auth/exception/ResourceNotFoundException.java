@@ -1,8 +1,15 @@
 package com.quizguru.auth.exception;
 
-public class ResourceNotFoundException extends RuntimeException{
+import com.quizguru.auth.utils.MessageUtils;
+import lombok.Getter;
+import lombok.Setter;
 
-    public ResourceNotFoundException(String message){
-        super(message);
+@Getter
+@Setter
+public class ResourceNotFoundException extends RuntimeException{
+    private String message;
+    public ResourceNotFoundException(String errorCode, Object... var2)
+    {
+        this.message = MessageUtils.getMessage(errorCode, var2);
     }
 }

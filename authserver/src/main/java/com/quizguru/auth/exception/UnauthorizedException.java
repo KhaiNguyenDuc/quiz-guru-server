@@ -6,9 +6,9 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class TokenValidationException extends RuntimeException {
+public class UnauthorizedException extends RuntimeException{
     private String message;
-    public TokenValidationException(String errorCode, Object... var2)
+    public UnauthorizedException(String errorCode, Object... var2)
     {
         this.message = MessageUtils.getMessage(errorCode, var2);
     }

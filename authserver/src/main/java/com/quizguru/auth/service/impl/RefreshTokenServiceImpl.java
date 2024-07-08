@@ -7,6 +7,7 @@ import com.quizguru.auth.model.User;
 import com.quizguru.auth.repository.RefreshTokenRepository;
 import com.quizguru.auth.repository.UserRepository;
 import com.quizguru.auth.service.RefreshTokenService;
+import com.quizguru.auth.utils.Constant;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -25,7 +26,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     @Override
     public RefreshToken generateRefreshToken(String userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Not found user with id: " + userId));
+                .orElseThrow(() -> new ResourceNotFoundException(Constant.ERROR_CODE.UNAUTHORIZED_ID_NOT_EXIST, userId));
 
         Optional<RefreshToken> refreshTokenOpt = refreshTokenRepository.findByUser(user);
         if (refreshTokenOpt.isPresent()) {

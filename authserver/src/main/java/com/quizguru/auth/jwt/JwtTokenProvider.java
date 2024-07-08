@@ -109,7 +109,7 @@ public class JwtTokenProvider {
                     .parseClaimsJws(authToken);
             return true;
         }catch(Exception e){
-            throw new TokenValidationException("Invalid token: " + e.getMessage());
+            return false;
         }
 
     }

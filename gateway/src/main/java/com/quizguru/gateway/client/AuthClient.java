@@ -14,7 +14,6 @@ public class AuthClient {
     private final WebClient.Builder webClientBuilder;
     private static final String HOST = "lb://AUTH-SERVER/auth/api/v1"; // Update scheme and host
 
-
     public Mono<ApiResponse<TokenValidationResponse>> validateToken(String token) {
         return webClientBuilder
                 .baseUrl(HOST)
@@ -26,4 +25,6 @@ public class AuthClient {
                 .bodyToMono(new ParameterizedTypeReference<ApiResponse<TokenValidationResponse>>() {
                 });
     }
+
+
 }

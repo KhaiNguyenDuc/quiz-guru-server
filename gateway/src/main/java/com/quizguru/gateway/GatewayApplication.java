@@ -21,8 +21,7 @@ public class GatewayApplication {
         return builder.routes()
                 .route(p -> p
                         .path("/contexts/**")
-                        .filters(f -> f.rewritePath("/contexts(?<segment>/?.*)", "$\\{segment}")
-								.filter(authenticationPrefilter.apply(new AuthenticationPrefilter.Config())))
+                        .filters(f -> f.filter(authenticationPrefilter.apply(new AuthenticationPrefilter.Config())))
                         .uri("lb://contexts")
                 )
                 .route(p -> p

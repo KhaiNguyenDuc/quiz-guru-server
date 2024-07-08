@@ -1,10 +1,11 @@
-package com.quizguru.generates.service;
+package com.quizguru.generates.service.impl;
 
 import com.quizguru.generates.amqp.properties.GenerateProperties;
 import com.quizguru.generates.amqp.properties.PromptProperties;
 import com.quizguru.generates.dto.request.ChatRequest;
 import com.quizguru.generates.dto.response.ChatResponse;
 import com.quizguru.generates.dto.request.ContextGenerationResult;
+import com.quizguru.generates.service.GenerateService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -13,7 +14,7 @@ import org.springframework.web.client.RestTemplate;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class GenerateServiceImp implements GenerateService{
+public class GenerateServiceImpl implements GenerateService {
 
     private final RestTemplate restTemplate;
 

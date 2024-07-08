@@ -4,6 +4,7 @@ import com.quizguru.contexts.dto.request.GenerateRequest;
 import com.quizguru.contexts.dto.response.GenerateContextResponse;
 import com.quizguru.contexts.service.ContextService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

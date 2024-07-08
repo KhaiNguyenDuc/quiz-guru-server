@@ -1,5 +1,7 @@
 package com.quizguru.auth.exception;
 
+import com.quizguru.auth.dto.error.ExceptionDetails;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -7,73 +9,56 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import java.time.LocalDateTime;
-
 @ControllerAdvice
-public class ExceptionController extends ResponseEntityExceptionHandler {
-
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ExceptionDetails> handleGlobalException(
-            Exception exception, WebRequest request
-    ) {
-        ExceptionDetails exceptionDetail = new ExceptionDetails(
-                request.getDescription(false),
-                HttpStatus.INTERNAL_SERVER_ERROR,
-                exception.getMessage(),
-                LocalDateTime.now()
-        );
-        return new ResponseEntity<>(exceptionDetail, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+@Slf4j
+public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(ResourceExistException.class)
     public ResponseEntity<ExceptionDetails> handleResourceExistException(
-            Exception exception, WebRequest request
+            ResourceExistException ex, WebRequest request
     ) {
         ExceptionDetails exceptionDetail = new ExceptionDetails(
-                request.getDescription(false),
-                HttpStatus.BAD_REQUEST,
-                exception.getMessage(),
-                LocalDateTime.now()
+                HttpStatus.BAD_REQUEST.toString(),
+                HttpStatus.BAD_REQUEST.getReasonPhrase(),
+                ex.getMessage()
         );
         return new ResponseEntity<>(exceptionDetail, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(UnAuthorizeException.class)
+    @ExceptionHandler(UnauthorizedException.class)
     public ResponseEntity<ExceptionDetails> handleUnAuthorizeException(
-            Exception exception, WebRequest request
+            UnauthorizedException ex, WebRequest request
     ) {
         ExceptionDetails exceptionDetail = new ExceptionDetails(
-                request.getDescription(false),
-                HttpStatus.UNAUTHORIZED,
-                exception.getMessage(),
-                LocalDateTime.now()
+                HttpStatus.UNAUTHORIZED.toString(),
+                HttpStatus.UNAUTHORIZED.getReasonPhrase(),
+                ex.getMessage()
         );
         return new ResponseEntity<>(exceptionDetail, HttpStatus.UNAUTHORIZED);
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ExceptionDetails> handleResourceNotFoundException(
-            Exception exception, WebRequest request
+            ResourceNotFoundException ex, WebRequest request
     ) {
         ExceptionDetails exceptionDetail = new ExceptionDetails(
-                request.getDescription(false),
-                HttpStatus.NOT_FOUND,
-                exception.getMessage(),
-                LocalDateTime.now()
+                HttpStatus.NOT_FOUND.toString(),
+                HttpStatus.NOT_FOUND.getReasonPhrase(),
+                ex.getMessage()
         );
         return new ResponseEntity<>(exceptionDetail, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(TokenValidationException.class)
     public ResponseEntity<ExceptionDetails> handleTokenValidationException(
-            Exception exception, WebRequest request
+            TokenValidationException ex, WebRequest request
     ) {
         ExceptionDetails exceptionDetail = new ExceptionDetails(
-                request.getDescription(false),
-                HttpStatus.BAD_REQUEST,
-                exception.getMessage(),
-                LocalDateTime.now()
+                HttpStatus.BAD_REQUEST.toString(),
+                HttpStatus.BAD_REQUEST.getReasonPhrase(),
+                ex.getMessage()
         );
+        log.error("inValidate token:" + exceptionDetail.detail());
         return new ResponseEntity<>(exceptionDetail, HttpStatus.BAD_REQUEST);
     }
 }
