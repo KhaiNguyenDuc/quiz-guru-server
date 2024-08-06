@@ -30,7 +30,7 @@ public class SecurityConfig{
     private final SecurityUserService securityUserService;
 
     private final String[] ALLOW_URL = {
-            "/auth/api/v1/**",
+            "/auth/**",
     };
 
     @Bean
@@ -58,7 +58,7 @@ public class SecurityConfig{
                .addFilterBefore(authenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(requests -> requests
                         .requestMatchers(ALLOW_URL).permitAll()
-//                        .requestMatchers("/auth/api/v1/refresh-token").authenticated()
+                        .requestMatchers("/auth/api/v1/refresh-token").authenticated()
                         .anyRequest().authenticated()
                 );
         return http.build();

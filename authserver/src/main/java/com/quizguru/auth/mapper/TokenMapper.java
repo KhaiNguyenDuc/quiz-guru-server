@@ -7,7 +7,7 @@ public class TokenMapper {
     public static RefreshTokenResponse tokenToRefreshTokenResponse(RefreshToken refreshToken){
         return  RefreshTokenResponse.builder()
                 .token(refreshToken.getToken())
-                .expiredDate(refreshToken.getExpiryDate())
+                .expiredDate(refreshToken.getExpiredDate())
                 .build();
     }
 }

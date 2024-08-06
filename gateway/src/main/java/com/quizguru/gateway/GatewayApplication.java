@@ -20,12 +20,15 @@ public class GatewayApplication {
             AuthenticationPrefilter authenticationPrefilter) {
         return builder.routes()
                 .route(p -> p
-                        .path("/contexts/**")
-                        .filters(f -> f.filter(authenticationPrefilter.apply(new AuthenticationPrefilter.Config())))
-                        .uri("lb://contexts")
+                        .path("/api/v1/quizzes/**")
+                        .filters(f -> f
+                                .filter(authenticationPrefilter.apply(new AuthenticationPrefilter.Config()))
+                                .rewritePath("/api/v1/(?<segment>.*)", "/$\\{segment}"))
+                        .uri("lb://quizzes")
                 )
                 .route(p -> p
-                        .path("/auth/**")
+                        .path("/api/v1/auth/**")
+                        .filters(f -> f.rewritePath("/api/v1/(?<segment>.*)", "/$\\{segment}"))
                         .uri("lb://auth-server")
                 )
                 .build();

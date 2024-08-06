@@ -6,6 +6,5 @@ public final class Constant {
         public static final String UNAUTHORIZED_ID_NOT_EXIST = "UNAUTHORIZED_ID_NOT_EXIST";
         public static final String INVALID_TOKEN = "INVALID_TOKEN";
         public static final String UNAUTHORIZED_INTERNAL_ERROR = "UNAUTHORIZED_INTERNAL_ERROR";
-
     }
 }

@@ -6,6 +6,7 @@ import com.quizguru.gateway.dto.TokenValidationResponse;
 import com.quizguru.gateway.exception.TokenValidationException;
 import com.quizguru.gateway.exception.UnauthorizedException;
 import com.quizguru.gateway.helper.JwtHelper;
+import com.quizguru.gateway.utils.CustomHeaders;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
@@ -52,8 +53,8 @@ public class AuthenticationPrefilter extends AbstractGatewayFilterFactory<Authen
                         String userId = tokenValidationResponse.userId();
                         String authorization = String.join(",", tokenValidationResponse.userAuthorities());
                         exchange.getRequest().mutate()
-                                .header("X-User-Id", userId)
-                                .header("X-User-Authorization", authorization)
+                                .header(CustomHeaders.X_USER_ID, userId)
+                                .header(CustomHeaders.X_USER_AUTHORITIES, authorization)
                                 .build();
                         return chain.filter(exchange);
                     })

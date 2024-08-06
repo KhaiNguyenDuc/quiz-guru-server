@@ -17,5 +17,7 @@ public class AmqpProperties {
     @Setter
     public static class Queues {
         private String generation;
+        private String textVocab;
+        private String fileVocab;
     }
 }

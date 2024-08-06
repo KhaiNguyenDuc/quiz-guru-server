@@ -15,7 +15,7 @@ import org.springframework.security.core.annotation.CurrentSecurityContext;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/auth/api/v1")
+@RequestMapping("/auth")
 @RequiredArgsConstructor
 public class AuthController {
 

@@ -1,5 +1,6 @@
 package com.quizguru.generates.dto.request.text;
 
+import com.quizguru.generates.amqp.properties.PromptProperties;
 import com.quizguru.generates.dto.request.HasHtmlContent;
 import com.quizguru.generates.dto.request.PromptRequest;
 import lombok.*;
@@ -20,5 +21,21 @@ public class BaseTextRequest extends PromptRequest implements HasHtmlContent {
     @Override
     public String getHtmlContent() {
         return this.htmlContent;
+    }
+
+    @Override
+    public String generatePrompt(PromptProperties promptConfiguration){
+        String prompt = "";
+        prompt = switch (this.type){
+            case MULTIPLE_CHOICE_QUESTION -> promptConfiguration.getMultipleChoiceQuizPrompt();
+            case MIX_QUESTION -> promptConfiguration.getMixChoiceQuizPrompt();
+            default -> promptConfiguration.getSingleChoiceQuizPrompt();
+        };
+
+        return String.format(prompt,
+                this.getNumber(),
+                this.type.getValue(),
+                this.level.getValue(),
+                this.getLanguage());
     }
 }

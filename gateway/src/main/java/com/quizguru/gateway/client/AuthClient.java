@@ -12,7 +12,7 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class AuthClient {
     private final WebClient.Builder webClientBuilder;
-    private static final String HOST = "lb://AUTH-SERVER/auth/api/v1"; // Update scheme and host
+    private static final String HOST = "lb://AUTH-SERVER/auth"; // Update scheme and host
 
     public Mono<ApiResponse<TokenValidationResponse>> validateToken(String token) {
         return webClientBuilder

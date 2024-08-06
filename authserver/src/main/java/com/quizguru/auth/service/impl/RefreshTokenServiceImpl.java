@@ -40,13 +40,13 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         RefreshToken refreshToken = RefreshToken.builder()
                 .user(user)
                 .token(UUID.randomUUID().toString())
-                .expiryDate(Instant.now().plusMillis(refreshTokenConfig.getExpirationMs()))
+                .expiredDate(Instant.now().plusMillis(refreshTokenConfig.getExpirationMs()))
                 .build();
         return refreshTokenRepository.save(refreshToken);
     }
 
     private RefreshToken renewRefreshToken(RefreshToken refreshToken) {
-        refreshToken.setExpiryDate(Instant.now().plusMillis(refreshTokenConfig.getExpirationMs()));
+        refreshToken.setExpiredDate(Instant.now().plusMillis(refreshTokenConfig.getExpirationMs()));
         refreshToken.setToken(UUID.randomUUID().toString());
         return refreshTokenRepository.save(refreshToken);
     }

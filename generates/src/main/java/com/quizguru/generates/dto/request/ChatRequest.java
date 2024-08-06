@@ -1,6 +1,7 @@
 package com.quizguru.generates.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.quizguru.generates.amqp.properties.GenerateProperties;
 import com.quizguru.generates.amqp.properties.PromptProperties;
 import com.quizguru.generates.dto.Message;
@@ -16,7 +17,7 @@ import java.util.List;
 public class ChatRequest {
 
     private String model;
-    private List<Message> messages;
+    private List<Message> messages = new ArrayList<>();
 
     @JsonIgnore
     private PromptRequest promptRequest;
@@ -30,14 +31,16 @@ public class ChatRequest {
     @JsonIgnore
     private GenerateProperties generateConfiguration;
 
+    @JsonProperty("response_format")
+    private ResponseFormat responseFormat = new ResponseFormat("json_object");
+
     public ChatRequest(PromptRequest promptRequest, PromptProperties promptProperties, GenerateProperties generateProperties) {
         this.generateConfiguration = generateProperties;
         this.promptConfiguration = promptProperties;
-        this.model = generateConfiguration.getModel();
-        this.messages = new ArrayList<>();
         this.promptRequest = promptRequest;
         this.givenText = this.promptRequest.getText();
         this.generateMessages(givenText);
+        this.model = generateProperties.model;
     }
 
     /**

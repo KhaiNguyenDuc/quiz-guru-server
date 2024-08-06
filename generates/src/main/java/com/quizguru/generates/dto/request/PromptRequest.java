@@ -19,18 +19,5 @@ public abstract class PromptRequest {
     public abstract String getText();
 
 
-    public String generatePrompt(PromptProperties promptConfiguration){
-        String prompt = "";
-        prompt = switch (this.type){
-            case MULTIPLE_CHOICE_QUESTION -> promptConfiguration.getMultipleChoiceQuizPrompt();
-            case MIX_QUESTION -> promptConfiguration.getMixChoiceQuizPrompt();
-            default -> promptConfiguration.getSingleChoiceQuizPrompt();
-        };
-
-        return String.format(prompt,
-                this.getNumber(),
-                this.type.getValue(),
-                this.level.getValue(),
-                this.getLanguage());
-    }
+    public abstract String generatePrompt(PromptProperties promptConfiguration);
 }

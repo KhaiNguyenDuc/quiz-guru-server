@@ -100,6 +100,7 @@ public class AuthServiceImpl implements AuthService {
                 .username(registerCredentials.username())
                 .password(encodedPassword)
                 .roles(List.of(role))
+                .isEnable(true)
                 .build();
 
         User userSaved = userRepository.save(user);

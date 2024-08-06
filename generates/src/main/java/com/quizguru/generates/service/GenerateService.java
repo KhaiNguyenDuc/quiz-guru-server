@@ -1,8 +1,8 @@
 package com.quizguru.generates.service;
 
 import com.quizguru.generates.dto.request.ChatRequest;
-import com.quizguru.generates.dto.request.ContextGenerationResult;
+import com.quizguru.generates.dto.request.QuizGenerationResult;
 
 public interface GenerateService {
-    ContextGenerationResult generateContext(ChatRequest chat);
+    QuizGenerationResult generateQuiz(ChatRequest chat);
 }
