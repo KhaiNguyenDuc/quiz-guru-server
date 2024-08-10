@@ -16,20 +16,11 @@ CREATE TABLE records (
     quiz_id VARCHAR(36)
 );
 
-
-
-
-
-
-
-
-
-
-
 CREATE TABLE record_item (
     id VARCHAR(36) NOT NULL PRIMARY KEY,
     record_id VARCHAR(36),
     question_id VARCHAR(36),
+    explanation NVARCHAR(200),
     FOREIGN KEY (record_id) REFERENCES records(id) ON DELETE CASCADE
 );
 

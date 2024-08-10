@@ -13,4 +13,6 @@ import org.springframework.stereotype.Repository;
 public interface QuizRepository extends JpaRepository<Quiz, String> {
     @Query("SELECT q FROM Quiz q WHERE q.isDeleted = false AND q.userId = :userId")
     Page<Quiz> findAllByUserId(@Param("userId") String userId, Pageable pageable);
+
+    boolean existsByUserId(String userId);
 }

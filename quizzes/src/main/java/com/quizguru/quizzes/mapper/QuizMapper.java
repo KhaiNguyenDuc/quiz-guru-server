@@ -1,6 +1,11 @@
 package com.quizguru.quizzes.mapper;
 
-import com.quizguru.quizzes.dto.request.*;
+import com.quizguru.quizzes.dto.request.text.BaseRequest;
+import com.quizguru.quizzes.dto.request.text.HandledFileRequest;
+import com.quizguru.quizzes.dto.request.text.RawFileRequest;
+import com.quizguru.quizzes.dto.request.vocabulary.HandledFileVocabRequest;
+import com.quizguru.quizzes.dto.request.vocabulary.RawFileVocabRequest;
+import com.quizguru.quizzes.dto.request.vocabulary.TextVocabRequest;
 import com.quizguru.quizzes.dto.response.GenerateQuizResponse;
 import com.quizguru.quizzes.dto.response.QuizResponse;
 import com.quizguru.quizzes.model.Quiz;
@@ -12,14 +17,25 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class QuizMapper {
-    public static Quiz generateRequestToQuiz(GenerateRequest generateRequest){
+    public static Quiz generateRequestToQuiz(BaseRequest baseRequest){
         return Quiz.builder()
-                .number(generateRequest.number())
-                .duration(generateRequest.duration())
-                .level(Level.valueOf(generateRequest.level()))
-                .type(QuizType.valueOf(generateRequest.type()))
-                .language(generateRequest.language())
-                .givenText(generateRequest.content())
+                .number(baseRequest.number())
+                .duration(baseRequest.duration())
+                .level(Level.valueOf(baseRequest.level()))
+                .type(QuizType.valueOf(baseRequest.type()))
+                .language(baseRequest.language())
+                .givenText(baseRequest.content())
+                .isDeleted(false)
+                .build();
+    }
+
+    public static Quiz fileRequestToQuiz(RawFileRequest rawFileRequest) {
+        return Quiz.builder()
+                .number(rawFileRequest.number())
+                .duration(rawFileRequest.duration())
+                .level(Level.valueOf(rawFileRequest.level()))
+                .type(QuizType.valueOf(rawFileRequest.type()))
+                .language(rawFileRequest.language())
                 .isDeleted(false)
                 .build();
     }
@@ -48,7 +64,7 @@ public class QuizMapper {
                 .build();
     }
 
-    public static Quiz docFileVocabRequestToQuiz(RawFileVocabRequest rawFileVocabRequest){
+    public static Quiz fileVocabRequestToQuiz(RawFileVocabRequest rawFileVocabRequest){
         return Quiz.builder()
                 .number(rawFileVocabRequest.number())
                 .duration(rawFileVocabRequest.duration())
@@ -58,6 +74,7 @@ public class QuizMapper {
                 .isDeleted(false)
                 .build();
     }
+
 
     public static HandledFileVocabRequest fileVocabToDocFileVocabRequest(RawFileVocabRequest rawFileVocabRequest){
         String fileContent = FileExtractor.extractDocxToString(rawFileVocabRequest.file());
@@ -125,5 +142,44 @@ public class QuizMapper {
                 .language(quiz.getLanguage())
                 .givenText(quiz.getGivenText())
                 .build();
+    }
+
+    public static HandledFileRequest fileToDocFileRequest(RawFileRequest rawFileRequest){
+        String fileContent = FileExtractor.extractDocxToString(rawFileRequest.file());
+        return new HandledFileRequest(
+                rawFileRequest.quizId(),
+                rawFileRequest.type(),
+                rawFileRequest.number(),
+                rawFileRequest.language(),
+                rawFileRequest.level(),
+                rawFileRequest.duration(),
+                fileContent
+        );
+    }
+
+    public static HandledFileRequest fileToPdfFileRequest(RawFileRequest rawFileRequest){
+        String fileContent = FileExtractor.extractPDFToString(rawFileRequest.file());
+        return new HandledFileRequest(
+                rawFileRequest.quizId(),
+                rawFileRequest.type(),
+                rawFileRequest.number(),
+                rawFileRequest.language(),
+                rawFileRequest.level(),
+                rawFileRequest.duration(),
+                fileContent
+        );
+    }
+
+    public static HandledFileRequest fileToTxtFileRequest(RawFileRequest rawFileRequest) {
+        String fileContent = FileExtractor.extractTxtToString(rawFileRequest.file());
+        return new HandledFileRequest(
+                rawFileRequest.quizId(),
+                rawFileRequest.type(),
+                rawFileRequest.number(),
+                rawFileRequest.language(),
+                rawFileRequest.level(),
+                rawFileRequest.duration(),
+                fileContent
+        );
     }
 }

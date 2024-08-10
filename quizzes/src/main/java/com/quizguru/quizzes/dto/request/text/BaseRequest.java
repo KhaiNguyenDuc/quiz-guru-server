@@ -1,6 +1,6 @@
-package com.quizguru.quizzes.dto.request;
+package com.quizguru.quizzes.dto.request.text;
 
-public record GenerateRequest(
+public record BaseRequest(
         String quizId,
         String content,
         String htmlContext,

@@ -3,9 +3,9 @@ INSERT INTO records (id, score, duration, time_left, user_id, quiz_id) VALUES
     ('550e8400-e29b-41d4-a716-446655440001', 90, 45, 10, 'user-id-2', '550e8400-e29b-41d4-a716-446655440001');
 
 
-INSERT INTO record_item (id, record_id, question_id) VALUES
-    ('550e8400-e29b-41d4-a716-446655440010', '550e8400-e29b-41d4-a716-446655440000', '550e8400-e29b-41d4-a716-446655440010'),
-    ('550e8400-e29b-41d4-a716-446655440011', '550e8400-e29b-41d4-a716-446655440001', '550e8400-e29b-41d4-a716-446655440011');
+INSERT INTO record_item (id, record_id, question_id, explanation) VALUES
+    ('550e8400-e29b-41d4-a716-446655440010', '550e8400-e29b-41d4-a716-446655440000', '550e8400-e29b-41d4-a716-446655440010', 'explanation 1'),
+    ('550e8400-e29b-41d4-a716-446655440011', '550e8400-e29b-41d4-a716-446655440001', '550e8400-e29b-41d4-a716-446655440011', 'explanation 2');
 
 
 INSERT INTO record_item_choice (record_item_id, choice_id) VALUES

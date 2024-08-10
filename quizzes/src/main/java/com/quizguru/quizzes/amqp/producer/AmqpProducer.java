@@ -1,5 +1,6 @@
-package com.quizguru.quizzes.amqp.properties;
+package com.quizguru.quizzes.amqp.producer;
 
+import com.quizguru.quizzes.amqp.properties.AmqpProperties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.stereotype.Component;

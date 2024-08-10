@@ -27,6 +27,20 @@ public class GatewayApplication {
                         .uri("lb://quizzes")
                 )
                 .route(p -> p
+                        .path("/api/v1/records/**")
+                        .filters(f -> f
+                                .filter(authenticationPrefilter.apply(new AuthenticationPrefilter.Config()))
+                                .rewritePath("/api/v1/(?<segment>.*)", "/$\\{segment}"))
+                        .uri("lb://records")
+                )
+                .route(p -> p
+                        .path("/api/v1/libraries/**")
+                        .filters(f -> f
+                                .filter(authenticationPrefilter.apply(new AuthenticationPrefilter.Config()))
+                                .rewritePath("/api/v1/(?<segment>.*)", "/$\\{segment}"))
+                        .uri("lb://libraries")
+                )
+                .route(p -> p
                         .path("/api/v1/auth/**")
                         .filters(f -> f.rewritePath("/api/v1/(?<segment>.*)", "/$\\{segment}"))
                         .uri("lb://auth-server")

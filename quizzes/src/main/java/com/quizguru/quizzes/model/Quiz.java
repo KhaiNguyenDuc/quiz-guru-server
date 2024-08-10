@@ -50,4 +50,7 @@ public class Quiz {
 
     @Column(name = "user_id")
     private String userId;
+
+    @Column(name = "word_set_id")
+    private String wordSetId;
 }

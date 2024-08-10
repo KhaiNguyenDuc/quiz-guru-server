@@ -1,4 +1,4 @@
-package com.quizguru.quizzes.dto.request;
+package com.quizguru.quizzes.dto.request.vocabulary;
 
 import java.util.List;
 

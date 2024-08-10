@@ -1,7 +1,12 @@
 package com.quizguru.quizzes.service.impl;
 
-import com.quizguru.quizzes.amqp.properties.AmqpProducer;
-import com.quizguru.quizzes.dto.request.*;
+import com.quizguru.quizzes.amqp.producer.AmqpProducer;
+import com.quizguru.quizzes.dto.request.text.BaseRequest;
+import com.quizguru.quizzes.dto.request.text.HandledFileRequest;
+import com.quizguru.quizzes.dto.request.text.RawFileRequest;
+import com.quizguru.quizzes.dto.request.vocabulary.HandledFileVocabRequest;
+import com.quizguru.quizzes.dto.request.vocabulary.RawFileVocabRequest;
+import com.quizguru.quizzes.dto.request.vocabulary.TextVocabRequest;
 import com.quizguru.quizzes.dto.response.GenerateQuizResponse;
 import com.quizguru.quizzes.dto.response.PageResponse;
 import com.quizguru.quizzes.dto.response.QuizResponse;
@@ -17,14 +22,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
-import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-
-import javax.swing.text.html.Option;
-import java.lang.module.ResolutionException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -37,12 +36,43 @@ public class QuizServiceImpl implements QuizService {
     private final QuizRepository quizRepository;
 
     @Override
-    public GenerateQuizResponse createQuizByText(GenerateRequest generateRequest) {
-        Quiz quiz = QuizMapper.generateRequestToQuiz(generateRequest);
+    public GenerateQuizResponse createQuizByText(BaseRequest baseRequest) {
+        Quiz quiz = QuizMapper.generateRequestToQuiz(baseRequest);
         quiz.setUserId(AuthProvider.getUserId());
         Quiz quizSaved = quizRepository.save(quiz);
-        amqpProducer.publishGenerateRequest(generateRequest);
+        amqpProducer.publishGenerateRequest(baseRequest);
         return QuizMapper.quizToGenerateQuizResponse(quizSaved);
+    }
+
+    @Override
+    public GenerateQuizResponse createQuizByDocFile(RawFileRequest rawFileRequest) {
+        Quiz quiz = QuizMapper.fileRequestToQuiz(rawFileRequest);
+        quiz.setUserId(AuthProvider.getUserId());
+        Quiz quizSaved = quizRepository.save(quiz);
+        HandledFileRequest docFileVocabRequest = QuizMapper.fileToDocFileRequest(rawFileRequest);
+        amqpProducer.publishDocFileVocabRequest(docFileVocabRequest);
+        return QuizMapper.quizToGenerateQuizResponse(quizSaved);
+    }
+
+    @Override
+    public GenerateQuizResponse createQuizByPdfFile(RawFileRequest rawFileRequest) {
+        Quiz quiz = QuizMapper.fileRequestToQuiz(rawFileRequest);
+        quiz.setUserId(AuthProvider.getUserId());
+        Quiz quizSaved = quizRepository.save(quiz);
+        HandledFileRequest docFileVocabRequest = QuizMapper.fileToPdfFileRequest(rawFileRequest);
+        amqpProducer.publishDocFileVocabRequest(docFileVocabRequest);
+        return QuizMapper.quizToGenerateQuizResponse(quizSaved);
+    }
+
+    @Override
+    public GenerateQuizResponse createQuizByTxtFile(RawFileRequest rawFileRequest) {
+        Quiz quiz = QuizMapper.fileRequestToQuiz(rawFileRequest);
+        quiz.setUserId(AuthProvider.getUserId());
+        Quiz quizSaved = quizRepository.save(quiz);
+        HandledFileRequest docFileVocabRequest = QuizMapper.fileToTxtFileRequest(rawFileRequest);
+        amqpProducer.publishDocFileVocabRequest(docFileVocabRequest);
+        return QuizMapper.quizToGenerateQuizResponse(quizSaved);
+
     }
 
     @Override
@@ -56,7 +86,7 @@ public class QuizServiceImpl implements QuizService {
 
     @Override
     public GenerateQuizResponse createVocabularyQuizByDocFile(RawFileVocabRequest rawFileVocabRequest){
-        Quiz quiz = QuizMapper.docFileVocabRequestToQuiz(rawFileVocabRequest);
+        Quiz quiz = QuizMapper.fileVocabRequestToQuiz(rawFileVocabRequest);
         quiz.setUserId(AuthProvider.getUserId());
         Quiz quizSaved = quizRepository.save(quiz);
         HandledFileVocabRequest docFileVocabRequest = QuizMapper.fileVocabToDocFileVocabRequest(rawFileVocabRequest);
@@ -66,7 +96,7 @@ public class QuizServiceImpl implements QuizService {
 
     @Override
     public GenerateQuizResponse createVocabularyQuizByPDFFile(RawFileVocabRequest rawFileVocabRequest) {
-        Quiz quiz = QuizMapper.docFileVocabRequestToQuiz(rawFileVocabRequest);
+        Quiz quiz = QuizMapper.fileVocabRequestToQuiz(rawFileVocabRequest);
         quiz.setUserId(AuthProvider.getUserId());
         Quiz quizSaved = quizRepository.save(quiz);
         HandledFileVocabRequest pdfFileVocabRequest = QuizMapper.fileVocabToPdfFileVocabRequest(rawFileVocabRequest);
@@ -76,7 +106,7 @@ public class QuizServiceImpl implements QuizService {
 
     @Override
     public GenerateQuizResponse createVocabularyQuizByTxtFile(RawFileVocabRequest rawFileVocabRequest) {
-        Quiz quiz = QuizMapper.docFileVocabRequestToQuiz(rawFileVocabRequest);
+        Quiz quiz = QuizMapper.fileVocabRequestToQuiz(rawFileVocabRequest);
         quiz.setUserId(AuthProvider.getUserId());
         Quiz quizSaved = quizRepository.save(quiz);
         HandledFileVocabRequest pdfFileVocabRequest = QuizMapper.fileVocabToTxtFileVocabRequest(rawFileVocabRequest);
@@ -85,8 +115,13 @@ public class QuizServiceImpl implements QuizService {
     }
 
     @Override
-    public PageResponse<List<QuizResponse>> findAllQuizByCurrentUser(Pageable pageable) {
-        String userId = AuthProvider.getUserId();
+    public PageResponse<List<QuizResponse>> findAllQuizByUserId(String userId, Pageable pageable) {
+        if(!quizRepository.existsByUserId(userId)){
+            throw new ResourceNotFoundException(Constant.RESOURCE_NOT_FOUND, "user", userId);
+        }
+        if (!AuthProvider.getUserId().equals(userId)){
+            throw new AccessDeniedException(Constant.ACCESS_DENIED, "user", userId);
+        }
         Page<Quiz> quizzes = quizRepository.findAllByUserId(userId, pageable);
 
         List<QuizResponse> quizResponses = QuizMapper.quizzesToQuizResponses(quizzes.getContent());
@@ -110,4 +145,21 @@ public class QuizServiceImpl implements QuizService {
         }
         return QuizMapper.quizToQuizResponse(quiz);
     }
+
+    @Override
+    public void deleteById(String quizId) {
+
+        Optional<Quiz> quizOpt = quizRepository.findById(quizId);
+        if(quizOpt.isEmpty()){
+            throw new ResourceNotFoundException(Constant.RESOURCE_NOT_FOUND, "quiz", quizId);
+        }
+        Quiz quiz = quizOpt.get();
+        String userId = SecurityContextHolder.getContext().getAuthentication().getName();
+        if(!userId.equals(quiz.getUserId())){
+            throw new AccessDeniedException(Constant.ACCESS_DENIED, "quiz", quizId);
+        }
+        quiz.setIsDeleted(true);
+        quizRepository.save(quiz);
+    }
+
 }

@@ -2,13 +2,16 @@ package com.quizguru.records.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 
 import java.util.List;
 
 @Data
 @Entity
 @Table(name = "record_item")
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class RecordItem {
 
     @Id
@@ -22,6 +25,9 @@ public class RecordItem {
 
     @Column(name = "question_id")
     private String questionId;
+
+    @Column(name = "explanation")
+    private String explanation;
 
     @ElementCollection
     @CollectionTable(name = "record_item_choice", joinColumns = @JoinColumn(name = "record_item_id"))

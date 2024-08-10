@@ -5,10 +5,10 @@ import com.quizguru.generates.dto.request.client.GenerateVocabByFileRequest;
 import com.quizguru.generates.dto.request.client.GenerateVocabByTextRequest;
 import com.quizguru.generates.dto.request.QuizGenerationResult;
 import com.quizguru.generates.dto.request.client.GenerateRequest;
-import com.quizguru.generates.dto.request.text.BaseTextRequest;
+import com.quizguru.generates.dto.request.text.TextRequest;
 import com.quizguru.generates.dto.request.vocabulary.HandledFileVocabRequest;
 import com.quizguru.generates.dto.request.vocabulary.TextVocabRequest;
-import com.quizguru.generates.enums.ContextType;
+import com.quizguru.generates.enums.QuizType;
 import com.quizguru.generates.enums.Level;
 import com.quizguru.generates.amqp.properties.GenerateProperties;
 import com.quizguru.generates.amqp.properties.PromptProperties;
@@ -29,16 +29,16 @@ public class GenerateConsumer {
     @RabbitListener(queues = "#{amqpProperties.queues.generation}" )
     public void generateQuizByTextConsumer(GenerateRequest generateRequest) {
 
-        BaseTextRequest baseTextRequest = BaseTextRequest.builder()
+        TextRequest textRequest = TextRequest.builder()
                 .content(generateRequest.content())
                 .htmlContent(generateRequest.htmlContext())
                 .number(generateRequest.number())
                 .level(Level.valueOf(generateRequest.level()))
                 .language(generateRequest.language())
-                .type(ContextType.valueOf(generateRequest.type()))
+                .type(QuizType.valueOf(generateRequest.type()))
                 .duration(generateRequest.duration())
                 .build();
-        ChatRequest chat = new ChatRequest(baseTextRequest, promptProperties, generateProperties);
+        ChatRequest chat = new ChatRequest(textRequest, promptProperties, generateProperties);
         QuizGenerationResult result = generateService.generateQuiz(chat);
         log.info(result.toString());
     }
@@ -51,7 +51,7 @@ public class GenerateConsumer {
                 .number(generateVocabByTextRequest.number())
                 .level(Level.valueOf(generateVocabByTextRequest.level()))
                 .language(generateVocabByTextRequest.language())
-                .type(ContextType.valueOf(generateVocabByTextRequest.type()))
+                .type(QuizType.valueOf(generateVocabByTextRequest.type()))
                 .duration(generateVocabByTextRequest.duration())
                 .build();
         ChatRequest chat = new ChatRequest(textVocabRequest, promptProperties, generateProperties);
@@ -66,7 +66,7 @@ public class GenerateConsumer {
                 .number(generateVocabByFileRequest.number())
                 .level(Level.valueOf(generateVocabByFileRequest.level()))
                 .language(generateVocabByFileRequest.language())
-                .type(ContextType.valueOf(generateVocabByFileRequest.type()))
+                .type(QuizType.valueOf(generateVocabByFileRequest.type()))
                 .duration(generateVocabByFileRequest.duration())
                 .fileContent(generateVocabByFileRequest.fileContent())
                 .build();

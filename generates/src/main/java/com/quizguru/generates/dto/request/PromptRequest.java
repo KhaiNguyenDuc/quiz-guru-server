@@ -2,7 +2,7 @@ package com.quizguru.generates.dto.request;
 
 import com.quizguru.generates.amqp.properties.PromptProperties;
 import com.quizguru.generates.enums.Level;
-import com.quizguru.generates.enums.ContextType;
+import com.quizguru.generates.enums.QuizType;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
@@ -10,7 +10,7 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 public abstract class PromptRequest {
 
-    public ContextType type;
+    public QuizType type;
     public Integer number;
     public String language;
     public Level level;

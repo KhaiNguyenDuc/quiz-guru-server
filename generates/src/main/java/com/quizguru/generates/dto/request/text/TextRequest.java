@@ -8,7 +8,7 @@ import lombok.experimental.SuperBuilder;
 
 @EqualsAndHashCode(callSuper = true)
 @SuperBuilder
-public class BaseTextRequest extends PromptRequest implements HasHtmlContent {
+public class TextRequest extends PromptRequest implements HasHtmlContent {
 
     private String content;
     private String htmlContent;
