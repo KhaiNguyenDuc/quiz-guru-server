@@ -4,8 +4,7 @@ import java.util.Date;
 import java.util.List;
 import javax.crypto.SecretKey;
 
-import com.quizguru.auth.config.JwtConfig;
-import com.quizguru.auth.exception.TokenValidationException;
+import com.quizguru.auth.properties.JwtProperties;
 import com.quizguru.auth.model.Role;
 import com.quizguru.auth.model.UserPrincipal;
 import lombok.RequiredArgsConstructor;
@@ -18,39 +17,23 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.HttpServletRequest;
 
-/**
- * Utility class for handling JWT (JSON Web Token) generation, parsing, and validation.
- */
 @Component
 @RequiredArgsConstructor
 public class JwtTokenProvider {
 
-    private final JwtConfig config;
-    /**
-     * Generates a JWT from the provided user ID and roles.
-     *
-     * @param userId The ID of the user.
-     * @param roles  The roles associated with the user.
-     * @return The generated JWT.
-     */
+    private final JwtProperties config;
+
     public String generateTokenFromUserId(String userId, List<Role> roles) {
         SecretKey key = Keys.hmacShaKeyFor(config.getSecret().getBytes());
         Date now = new Date();
-        String jws = Jwts.builder()
+        return Jwts.builder()
                 .setSubject(userId)
                 .claim("role", roles)
                 .setExpiration(new Date(now.getTime() + config.getExpirationMs()))
                 .signWith(key, SignatureAlgorithm.HS512)
                 .compact();
-        return jws;
     }
 
-    /**
-     * Generates a JWT from the provided authentication information.
-     *
-     * @param auth The authentication object.
-     * @return The generated JWT.
-     */
     public String generateToken(Authentication auth) {
 
         UserPrincipal userPrincipal = (UserPrincipal) auth.getPrincipal();
@@ -67,12 +50,6 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-    /**
-     * Resolves the JWT token from the provided HTTP servlet request.
-     *
-     * @param request The HTTP servlet request.
-     * @return The resolved JWT token.
-     */
     public String resolveToken(HttpServletRequest request) {
         String bearerToken = request.getHeader("Authorization");
         if(StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer")) {
@@ -81,12 +58,6 @@ public class JwtTokenProvider {
         return "";
     }
 
-    /**
-     * Retrieves the user ID from the provided JWT token.
-     *
-     * @param jwt The JWT token.
-     * @return The user ID extracted from the JWT token.
-     */
     public String getUserIdFromJwt(String jwt) {
 
         SecretKey key = Keys.hmacShaKeyFor(config.getSecret().getBytes());
@@ -111,7 +82,6 @@ public class JwtTokenProvider {
         }catch(Exception e){
             return false;
         }
-
     }
 }
 

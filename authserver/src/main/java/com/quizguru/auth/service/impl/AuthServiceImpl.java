@@ -23,8 +23,10 @@ import com.quizguru.auth.utils.Constant;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -43,6 +45,7 @@ public class AuthServiceImpl implements AuthService {
     private final RoleRepository roleRepository;
     private final PasswordEncoder encoder;
     private final RefreshTokenService refreshTokenService;
+
     @Override
     public TokenValidationResponse validateJwtToken(String token) {
         boolean isTokenValid = tokenProvider.validateToken(token);
@@ -66,19 +69,23 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public TokenResponse authenticate(LoginCredentials loginCredentials) {
 
-        UsernamePasswordAuthenticationToken token =
-                new UsernamePasswordAuthenticationToken(loginCredentials.username(), loginCredentials.password());
-        Authentication auth = authManager.authenticate(token);
-        String jwt = tokenProvider.generateToken(auth);
+        try {
+            UsernamePasswordAuthenticationToken token =
+                    new UsernamePasswordAuthenticationToken(loginCredentials.username(), loginCredentials.password());
+            Authentication auth = authManager.authenticate(token);
+            String jwt = tokenProvider.generateToken(auth);
 
-        UserPrincipal userDetails = (UserPrincipal) auth.getPrincipal();
-        RefreshToken refreshToken = refreshTokenService.generateRefreshToken(userDetails.getId());
-        return TokenResponse.builder()
-                .accessToken(jwt)
-                .refreshToken(refreshToken.getToken())
-                .build();
+            UserPrincipal userDetails = (UserPrincipal) auth.getPrincipal();
+            RefreshToken refreshToken = refreshTokenService.generateOrRenewRefreshToken(userDetails.getId());
+
+            return TokenResponse.builder()
+                    .accessToken(jwt)
+                    .refreshToken(refreshToken.getToken())
+                    .build();
+        } catch (BadCredentialsException e) {
+            throw new UnauthorizedException(Constant.ERROR_CODE.INVALID_CREDENTIALS);
+        }
     }
-
 
     @Override
     public RegisterResponse register(RegisterCredentials registerCredentials) {
@@ -100,7 +107,7 @@ public class AuthServiceImpl implements AuthService {
                 .username(registerCredentials.username())
                 .password(encodedPassword)
                 .roles(List.of(role))
-                .isEnable(true)
+                .isEnable(false)
                 .build();
 
         User userSaved = userRepository.save(user);

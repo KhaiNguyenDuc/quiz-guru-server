@@ -17,8 +17,13 @@ public class UserPrincipal implements UserDetails {
     private String id;
     private String username;
     private String password;
+    private Boolean isEnabled;
     private List<GrantedAuthority> authorities;
 
+    @Override
+    public boolean isEnabled() {
+        return this.isEnabled;
+    }
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return null;
@@ -42,6 +47,7 @@ public class UserPrincipal implements UserDetails {
         return new UserPrincipal(user.getId(),
                 user.getUsername(),
                 user.getPassword(),
+                user.isEnabled(),
                 authorities);
     }
 

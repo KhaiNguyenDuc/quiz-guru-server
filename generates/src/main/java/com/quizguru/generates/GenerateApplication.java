@@ -1,8 +1,8 @@
 package com.quizguru.generates;
 
-import com.quizguru.generates.amqp.properties.AmqpProperties;
-import com.quizguru.generates.amqp.properties.GenerateProperties;
-import com.quizguru.generates.amqp.properties.PromptProperties;
+import com.quizguru.generates.properties.AmqpProperties;
+import com.quizguru.generates.properties.GenerateProperties;
+import com.quizguru.generates.properties.PromptProperties;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

@@ -1,17 +1,15 @@
 package com.quizguru.auth.controller;
 
-import com.quizguru.auth.dto.request.LoginCredentials;
-import com.quizguru.auth.dto.request.RegisterCredentials;
+import com.quizguru.auth.dto.request.*;
 import com.quizguru.auth.dto.response.*;
-import com.quizguru.auth.mapper.TokenMapper;
-import com.quizguru.auth.model.RefreshToken;
-import com.quizguru.auth.model.UserPrincipal;
+import com.quizguru.auth.model.VerificationToken;
 import com.quizguru.auth.service.AuthService;
+import com.quizguru.auth.service.PasswordResetService;
 import com.quizguru.auth.service.RefreshTokenService;
+import com.quizguru.auth.service.VerificationTokenService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.CurrentSecurityContext;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -21,35 +19,75 @@ public class AuthController {
 
     private final AuthService authService;
     private final RefreshTokenService refreshTokenService;
+    private final VerificationTokenService verificationTokenService;
+    private final PasswordResetService passwordResetService;
 
     @PostMapping("/validate-token")
-    public ResponseEntity<ApiResponse<TokenValidationResponse>> validateToken(@RequestBody String token){
+    public ResponseEntity<ApiResponse> validateToken(@RequestBody String token){
         TokenValidationResponse result = authService.validateJwtToken(token);
-        ApiResponse<TokenValidationResponse> response = new ApiResponse<>(result, "Success");
+        ApiResponse response = new ApiResponse(result, "Success");
         return new ResponseEntity<>(response,HttpStatus.OK);
     }
 
     @PostMapping("/token")
-    public ResponseEntity<ApiResponse<TokenResponse>> authenticate(@RequestBody LoginCredentials loginCredentials){
+    public ResponseEntity<ApiResponse> authenticate(@RequestBody LoginCredentials loginCredentials){
         TokenResponse result = authService.authenticate(loginCredentials);
-        ApiResponse<TokenResponse> response = new ApiResponse<>(result, "Success");
+        ApiResponse response = new ApiResponse(result, "Success");
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @GetMapping("/refresh-token")
-    public ResponseEntity<ApiResponse<RefreshTokenResponse>> refreshToken(
-            @CurrentSecurityContext(expression = "authentication.principal") UserPrincipal userPrincipal
-    ){
-        RefreshToken token = refreshTokenService.generateRefreshToken(userPrincipal.getId());
-        RefreshTokenResponse result = TokenMapper.tokenToRefreshTokenResponse(token);
-        ApiResponse<RefreshTokenResponse> response = new ApiResponse<>(result, "Success");
+    @PostMapping("/refresh-token")
+    public ResponseEntity<ApiResponse> refreshToken(
+            @RequestBody RefreshTokenRequest refreshTokenRequest
+            ){
+        TokenResponse tokenResponse = refreshTokenService.renewAccessToken(refreshTokenRequest);
+        ApiResponse response = new ApiResponse(tokenResponse, "Success");
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @PostMapping("/register")
-    public ResponseEntity<ApiResponse<RegisterResponse>> register(@RequestBody RegisterCredentials registerCredentials){
+    public ResponseEntity<ApiResponse> register(@RequestBody RegisterCredentials registerCredentials){
         RegisterResponse result = authService.register(registerCredentials);
-        ApiResponse<RegisterResponse> response = new ApiResponse<>(result, "Success");
+        VerificationToken token = verificationTokenService.createToken(result.id());
+        verificationTokenService.sendVerifyToken(result, token);
+        ApiResponse response = new ApiResponse(result, "Success");
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @PostMapping("/verify")
+    public ResponseEntity<ApiResponse> verifyUser(
+            @RequestBody VerifyRequest verifyRequest
+    ){
+        Boolean result = verificationTokenService.verifyUser(verifyRequest.token(), verifyRequest.username());
+        ApiResponse response = new ApiResponse(result, "Success");
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+    @GetMapping("/send-verify")
+    public ResponseEntity<ApiResponse> resendVerifyToken(
+            @RequestParam String username
+
+    ){
+        Boolean result = verificationTokenService.resendVerifyToken(username);
+        ApiResponse response = new ApiResponse(result, "Success");
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+    @GetMapping("/send-reset-password")
+    public ResponseEntity<ApiResponse> sendResetPassword(
+            @RequestParam("username") String username)  {
+
+        String userId = passwordResetService.sendResetPassword(username);
+        ApiResponse response = new ApiResponse(userId, "Success");
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<ApiResponse> resetPassword(
+            @RequestBody ResetPasswordRequest resetPasswordRequest)  {
+
+        passwordResetService.resetPassword(resetPasswordRequest);
+        ApiResponse response = new ApiResponse("OK", "Success");
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

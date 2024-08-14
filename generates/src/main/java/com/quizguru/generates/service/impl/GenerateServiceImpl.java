@@ -1,6 +1,6 @@
 package com.quizguru.generates.service.impl;
 
-import com.quizguru.generates.amqp.properties.GenerateProperties;
+import com.quizguru.generates.properties.GenerateProperties;
 import com.quizguru.generates.dto.request.ChatRequest;
 import com.quizguru.generates.dto.response.ChatResponse;
 import com.quizguru.generates.dto.request.QuizGenerationResult;

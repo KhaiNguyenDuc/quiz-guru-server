@@ -2,10 +2,7 @@ package com.quizguru.auth.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.List;
 
@@ -32,11 +29,16 @@ public class User {
     private String password;
 
     @Column(name = "is_enabled")
+    @Getter(AccessLevel.NONE)
     private Boolean isEnable;
 
     @OneToOne(mappedBy = "user")
     @JsonIgnore
     private RefreshToken refreshToken;
+
+    @OneToOne(mappedBy = "user")
+    @JsonIgnore
+    private PasswordResetToken passwordResetToken;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
@@ -44,5 +46,9 @@ public class User {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id"))
     private List<Role> roles;
+
+    public Boolean isEnabled(){
+        return this.isEnable;
+    }
 
 }

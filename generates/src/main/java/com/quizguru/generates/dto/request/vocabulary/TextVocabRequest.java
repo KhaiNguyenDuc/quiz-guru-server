@@ -1,6 +1,6 @@
 package com.quizguru.generates.dto.request.vocabulary;
 
-import com.quizguru.generates.amqp.properties.PromptProperties;
+import com.quizguru.generates.properties.PromptProperties;
 import com.quizguru.generates.dto.request.PromptRequest;
 import lombok.Data;
 import lombok.EqualsAndHashCode;

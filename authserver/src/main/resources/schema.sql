@@ -1,7 +1,7 @@
-DROP DATABASE IF EXISTS quizguru_user;
-CREATE DATABASE quizguru_user;
+DROP DATABASE IF EXISTS quizguru_auth;
+CREATE DATABASE quizguru_auth;
 
-USE quizguru_user;
+USE quizguru_auth;
 
 DROP TABLE IF EXISTS user_role;
 DROP TABLE IF EXISTS refresh_token;
@@ -32,7 +32,23 @@ CREATE TABLE user_role (
 CREATE TABLE refresh_token (
    id VARCHAR(255) PRIMARY KEY,
    token VARCHAR(255) NOT NULL,
-   expired_date DATE NOT NULL,
+   expired_date TIMESTAMP NOT NULL,
    user_id CHAR(36) NOT NULL,
    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+CREATE TABLE password_reset_token (
+    id VARCHAR(255) PRIMARY KEY,
+    token VARCHAR(255) NOT NULL,
+    expired_date TIMESTAMP NOT NULL,
+    user_id CHAR(36) NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+CREATE TABLE verification_token (
+    id VARCHAR(255) PRIMARY KEY,
+    token VARCHAR(255) NOT NULL,
+    expired_date TIMESTAMP NOT NULL,
+    user_id CHAR(36) NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id)
 );

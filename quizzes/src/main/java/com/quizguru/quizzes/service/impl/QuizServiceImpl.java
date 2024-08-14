@@ -1,6 +1,6 @@
 package com.quizguru.quizzes.service.impl;
 
-import com.quizguru.quizzes.amqp.producer.AmqpProducer;
+import com.quizguru.quizzes.producer.GenerateProducer;
 import com.quizguru.quizzes.dto.request.text.BaseRequest;
 import com.quizguru.quizzes.dto.request.text.HandledFileRequest;
 import com.quizguru.quizzes.dto.request.text.RawFileRequest;
@@ -32,7 +32,7 @@ import java.util.Optional;
 @Slf4j
 public class QuizServiceImpl implements QuizService {
 
-    private final AmqpProducer amqpProducer;
+    private final GenerateProducer generateProducer;
     private final QuizRepository quizRepository;
 
     @Override
@@ -40,7 +40,7 @@ public class QuizServiceImpl implements QuizService {
         Quiz quiz = QuizMapper.generateRequestToQuiz(baseRequest);
         quiz.setUserId(AuthProvider.getUserId());
         Quiz quizSaved = quizRepository.save(quiz);
-        amqpProducer.publishGenerateRequest(baseRequest);
+        generateProducer.publishGenerateRequest(baseRequest);
         return QuizMapper.quizToGenerateQuizResponse(quizSaved);
     }
 
@@ -50,7 +50,7 @@ public class QuizServiceImpl implements QuizService {
         quiz.setUserId(AuthProvider.getUserId());
         Quiz quizSaved = quizRepository.save(quiz);
         HandledFileRequest docFileVocabRequest = QuizMapper.fileToDocFileRequest(rawFileRequest);
-        amqpProducer.publishDocFileVocabRequest(docFileVocabRequest);
+        generateProducer.publishDocFileVocabRequest(docFileVocabRequest);
         return QuizMapper.quizToGenerateQuizResponse(quizSaved);
     }
 
@@ -60,7 +60,7 @@ public class QuizServiceImpl implements QuizService {
         quiz.setUserId(AuthProvider.getUserId());
         Quiz quizSaved = quizRepository.save(quiz);
         HandledFileRequest docFileVocabRequest = QuizMapper.fileToPdfFileRequest(rawFileRequest);
-        amqpProducer.publishDocFileVocabRequest(docFileVocabRequest);
+        generateProducer.publishDocFileVocabRequest(docFileVocabRequest);
         return QuizMapper.quizToGenerateQuizResponse(quizSaved);
     }
 
@@ -70,7 +70,7 @@ public class QuizServiceImpl implements QuizService {
         quiz.setUserId(AuthProvider.getUserId());
         Quiz quizSaved = quizRepository.save(quiz);
         HandledFileRequest docFileVocabRequest = QuizMapper.fileToTxtFileRequest(rawFileRequest);
-        amqpProducer.publishDocFileVocabRequest(docFileVocabRequest);
+        generateProducer.publishDocFileVocabRequest(docFileVocabRequest);
         return QuizMapper.quizToGenerateQuizResponse(quizSaved);
 
     }
@@ -80,7 +80,7 @@ public class QuizServiceImpl implements QuizService {
         Quiz quiz = QuizMapper.textVocabRequestToQuiz(textVocabRequest);
         quiz.setUserId(AuthProvider.getUserId());
         Quiz quizSaved = quizRepository.save(quiz);
-        amqpProducer.publishTextVocabRequest(textVocabRequest);
+        generateProducer.publishTextVocabRequest(textVocabRequest);
         return QuizMapper.quizToGenerateQuizResponse(quizSaved);
     }
 
@@ -90,7 +90,7 @@ public class QuizServiceImpl implements QuizService {
         quiz.setUserId(AuthProvider.getUserId());
         Quiz quizSaved = quizRepository.save(quiz);
         HandledFileVocabRequest docFileVocabRequest = QuizMapper.fileVocabToDocFileVocabRequest(rawFileVocabRequest);
-        amqpProducer.publishDocFileVocabRequest(docFileVocabRequest);
+        generateProducer.publishDocFileVocabRequest(docFileVocabRequest);
         return QuizMapper.quizToGenerateQuizResponse(quizSaved);
     }
 
@@ -100,7 +100,7 @@ public class QuizServiceImpl implements QuizService {
         quiz.setUserId(AuthProvider.getUserId());
         Quiz quizSaved = quizRepository.save(quiz);
         HandledFileVocabRequest pdfFileVocabRequest = QuizMapper.fileVocabToPdfFileVocabRequest(rawFileVocabRequest);
-        amqpProducer.publishDocFileVocabRequest(pdfFileVocabRequest);
+        generateProducer.publishDocFileVocabRequest(pdfFileVocabRequest);
         return QuizMapper.quizToGenerateQuizResponse(quizSaved);
     }
 
@@ -110,7 +110,7 @@ public class QuizServiceImpl implements QuizService {
         quiz.setUserId(AuthProvider.getUserId());
         Quiz quizSaved = quizRepository.save(quiz);
         HandledFileVocabRequest pdfFileVocabRequest = QuizMapper.fileVocabToTxtFileVocabRequest(rawFileVocabRequest);
-        amqpProducer.publishDocFileVocabRequest(pdfFileVocabRequest);
+        generateProducer.publishDocFileVocabRequest(pdfFileVocabRequest);
         return QuizMapper.quizToGenerateQuizResponse(quizSaved);
     }
 

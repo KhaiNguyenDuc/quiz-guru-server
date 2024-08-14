@@ -2,8 +2,8 @@ package com.quizguru.generates.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.quizguru.generates.amqp.properties.GenerateProperties;
-import com.quizguru.generates.amqp.properties.PromptProperties;
+import com.quizguru.generates.properties.GenerateProperties;
+import com.quizguru.generates.properties.PromptProperties;
 import com.quizguru.generates.dto.Message;
 import lombok.Data;
 

@@ -33,7 +33,7 @@ public class QuizController {
         return new ResponseEntity<>(new ApiResponse(response, "success"), HttpStatus.OK);
     }
 
-    @PostMapping(name = "/doc", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+    @PostMapping(value = "/doc", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
     public ResponseEntity<ApiResponse> createQuizByDocFile(
             @ModelAttribute RawFileRequest rawFileRequest
     ){
@@ -41,7 +41,7 @@ public class QuizController {
         return new ResponseEntity<>(new ApiResponse(response, "success"), HttpStatus.OK);
     }
 
-    @PostMapping(name = "/pdf", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+    @PostMapping(value = "/pdf", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
     public ResponseEntity<ApiResponse> createQuizByPdfFile(
             @ModelAttribute RawFileRequest rawFileRequest
     ){
@@ -49,7 +49,7 @@ public class QuizController {
         return new ResponseEntity<>(new ApiResponse(response, "success"), HttpStatus.OK);
     }
 
-    @PostMapping(name = "/txt", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+    @PostMapping(value = "/txt", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
     public ResponseEntity<ApiResponse> createQuizByTxtFile(
             @ModelAttribute RawFileRequest rawFileRequest
     ){

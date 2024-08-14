@@ -1,5 +1,6 @@
 package com.quizguru.auth.service.impl;
 
+import com.quizguru.auth.exception.AccessDeniedException;
 import com.quizguru.auth.exception.UnauthorizedException;
 import com.quizguru.auth.model.UserPrincipal;
 import com.quizguru.auth.model.User;
@@ -23,6 +24,10 @@ public class SecurityUserService implements UserDetailsService, UserService {
         User user = userRepository.findByUsernameOrEmail(username, username)
                 .orElseThrow(() -> new UnauthorizedException(Constant.ERROR_CODE.UNAUTHORIZED_USERNAME_NOT_EXIST, username));
 
+        if(!user.isEnabled()){
+            throw new AccessDeniedException(Constant.ERROR_CODE.USER_NOT_ENABLED, username);
+        }
+
         return UserPrincipal.create(user);
     }
 
@@ -30,6 +35,10 @@ public class SecurityUserService implements UserDetailsService, UserService {
     public UserDetails loadUserById(String id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new UnauthorizedException(Constant.ERROR_CODE.UNAUTHORIZED_ID_NOT_EXIST, id));
+
+        if(!user.isEnabled()){
+            throw new AccessDeniedException(Constant.ERROR_CODE.USER_NOT_ENABLED, id);
+        }
 
         return UserPrincipal.create(user);
     }

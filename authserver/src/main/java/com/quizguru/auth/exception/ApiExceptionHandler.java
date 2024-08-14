@@ -58,7 +58,55 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
                 HttpStatus.BAD_REQUEST.getReasonPhrase(),
                 ex.getMessage()
         );
-        log.error("inValidate token:" + exceptionDetail.detail());
+        log.error("Invalidate token:" + exceptionDetail.detail());
+        return new ResponseEntity<>(exceptionDetail, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(InvalidRefreshTokenException.class)
+    public ResponseEntity<ExceptionDetails> handleInvalidRefreshTokenException(
+            InvalidRefreshTokenException ex, WebRequest request
+    ) {
+        ExceptionDetails exceptionDetail = new ExceptionDetails(
+                HttpStatus.BAD_REQUEST.toString(),
+                HttpStatus.BAD_REQUEST.getReasonPhrase(),
+                ex.getMessage()
+        );
+       return new ResponseEntity<>(exceptionDetail, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(InvalidVerifyTokenException.class)
+    public ResponseEntity<ExceptionDetails> handleInvalidVerifyTokenException(
+            InvalidVerifyTokenException ex, WebRequest request
+    ) {
+        ExceptionDetails exceptionDetail = new ExceptionDetails(
+                HttpStatus.BAD_REQUEST.toString(),
+                HttpStatus.BAD_REQUEST.getReasonPhrase(),
+                ex.getMessage()
+        );
+        return new ResponseEntity<>(exceptionDetail, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ExceptionDetails> handleAccessDeniedException(
+            AccessDeniedException ex, WebRequest request
+    ) {
+        ExceptionDetails exceptionDetail = new ExceptionDetails(
+                HttpStatus.FORBIDDEN.toString(),
+                HttpStatus.FORBIDDEN.getReasonPhrase(),
+                ex.getMessage()
+        );
+        return new ResponseEntity<>(exceptionDetail, HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(InvalidRequestException.class)
+    public ResponseEntity<ExceptionDetails> handleInvalidRequestException(
+            InvalidRequestException ex, WebRequest request
+    ) {
+        ExceptionDetails exceptionDetail = new ExceptionDetails(
+                HttpStatus.BAD_REQUEST.toString(),
+                HttpStatus.BAD_REQUEST.getReasonPhrase(),
+                ex.getMessage()
+        );
         return new ResponseEntity<>(exceptionDetail, HttpStatus.BAD_REQUEST);
     }
 }
