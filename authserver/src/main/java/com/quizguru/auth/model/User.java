@@ -6,7 +6,8 @@ import lombok.*;
 
 import java.util.List;
 
-@Data
+@Getter
+@Setter
 @Table(name = "users")
 @Builder
 @Entity
@@ -27,6 +28,9 @@ public class User {
     @Column(name = "password")
     @JsonIgnore
     private String password;
+
+    @Column(name = "library_id")
+    private String libraryId;
 
     @Column(name = "is_enabled")
     @Getter(AccessLevel.NONE)

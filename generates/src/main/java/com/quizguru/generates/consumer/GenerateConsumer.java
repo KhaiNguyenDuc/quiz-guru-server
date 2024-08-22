@@ -2,11 +2,12 @@ package com.quizguru.generates.consumer;
 
 import com.quizguru.generates.dto.request.ChatRequest;
 import com.quizguru.generates.dto.request.client.GenerateVocabByFileRequest;
+import com.quizguru.generates.dto.request.client.GenerateVocabByListRequest;
 import com.quizguru.generates.dto.request.client.GenerateVocabByTextRequest;
-import com.quizguru.generates.dto.request.QuizGenerationResult;
 import com.quizguru.generates.dto.request.client.GenerateRequest;
 import com.quizguru.generates.dto.request.text.TextRequest;
 import com.quizguru.generates.dto.request.vocabulary.HandledFileVocabRequest;
+import com.quizguru.generates.dto.request.vocabulary.ListVocabRequest;
 import com.quizguru.generates.dto.request.vocabulary.TextVocabRequest;
 import com.quizguru.generates.enums.QuizType;
 import com.quizguru.generates.enums.Level;
@@ -16,6 +17,7 @@ import com.quizguru.generates.service.GenerateService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.messaging.Message;
 import org.springframework.stereotype.Component;
 
 @AllArgsConstructor
@@ -30,6 +32,7 @@ public class GenerateConsumer {
     public void generateQuizByTextConsumer(GenerateRequest generateRequest) {
 
         TextRequest textRequest = TextRequest.builder()
+                .quizId(generateRequest.quizId())
                 .content(generateRequest.content())
                 .htmlContent(generateRequest.htmlContext())
                 .number(generateRequest.number())
@@ -39,15 +42,35 @@ public class GenerateConsumer {
                 .duration(generateRequest.duration())
                 .build();
         ChatRequest chat = new ChatRequest(textRequest, promptProperties, generateProperties);
-        QuizGenerationResult result = generateService.generateQuiz(chat);
-        log.info(result.toString());
+        generateService.generateQuiz(chat, generateRequest.userId());
+    }
+
+    @RabbitListener(queues = "#{amqpProperties.queues.listVocab}" )
+    public void generateQuizVocabByListConsumer(GenerateVocabByListRequest generateVocabByListRequest) {
+
+        ListVocabRequest listVocabRequest = ListVocabRequest.builder()
+                .quizId(generateVocabByListRequest.quizId())
+                .wordSetId(generateVocabByListRequest.wordSetId())
+                .wordSetName(generateVocabByListRequest.wordSetName())
+                .names(generateVocabByListRequest.names())
+                .number(generateVocabByListRequest.number())
+                .level(Level.valueOf(generateVocabByListRequest.level()))
+                .language(generateVocabByListRequest.language())
+                .type(QuizType.valueOf(generateVocabByListRequest.type()))
+                .duration(generateVocabByListRequest.duration())
+                .build();
+        ChatRequest chat = new ChatRequest(listVocabRequest, promptProperties, generateProperties);
+        generateService.generateQuiz(chat, generateVocabByListRequest.userId());
     }
 
     @RabbitListener(queues = "#{amqpProperties.queues.textVocab}" )
     public void generateQuizVocabByTextConsumer(GenerateVocabByTextRequest generateVocabByTextRequest) {
 
         TextVocabRequest textVocabRequest = TextVocabRequest.builder()
-                .names(generateVocabByTextRequest.names())
+                .quizId(generateVocabByTextRequest.quizId())
+                .wordSetId(generateVocabByTextRequest.wordSetId())
+                .wordSetName(generateVocabByTextRequest.wordSetName())
+                .content(generateVocabByTextRequest.content())
                 .number(generateVocabByTextRequest.number())
                 .level(Level.valueOf(generateVocabByTextRequest.level()))
                 .language(generateVocabByTextRequest.language())
@@ -55,14 +78,16 @@ public class GenerateConsumer {
                 .duration(generateVocabByTextRequest.duration())
                 .build();
         ChatRequest chat = new ChatRequest(textVocabRequest, promptProperties, generateProperties);
-        QuizGenerationResult result = generateService.generateQuiz(chat);
-        log.info(result.toString());
+        generateService.generateQuiz(chat, generateVocabByTextRequest.userId());
     }
 
     @RabbitListener(queues = "#{amqpProperties.queues.fileVocab}" )
     public void generateQuizVocabByFileConsumer(GenerateVocabByFileRequest generateVocabByFileRequest) {
 
         HandledFileVocabRequest handledFileVocabRequest = HandledFileVocabRequest.builder()
+                .quizId(generateVocabByFileRequest.quizId())
+                .wordSetId(generateVocabByFileRequest.wordSetId())
+                .wordSetName(generateVocabByFileRequest.wordSetName())
                 .number(generateVocabByFileRequest.number())
                 .level(Level.valueOf(generateVocabByFileRequest.level()))
                 .language(generateVocabByFileRequest.language())
@@ -71,8 +96,7 @@ public class GenerateConsumer {
                 .fileContent(generateVocabByFileRequest.fileContent())
                 .build();
         ChatRequest chat = new ChatRequest(handledFileVocabRequest, promptProperties, generateProperties);
-        QuizGenerationResult result = generateService.generateQuiz(chat);
-        log.info(result.toString());
+        generateService.generateQuiz(chat, generateVocabByFileRequest.userId());
     }
 
 }

@@ -19,5 +19,6 @@ public class AmqpProperties {
         private String generation;
         private String textVocab;
         private String fileVocab;
+        private String listVocab;
     }
 }

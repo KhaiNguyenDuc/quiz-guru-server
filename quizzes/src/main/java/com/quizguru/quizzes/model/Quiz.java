@@ -25,7 +25,7 @@ public class Quiz {
     @Column(name = "given_text", columnDefinition = "LONGTEXT")
     private String givenText;
 
-    @OneToMany(mappedBy = "quiz", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "quiz", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private List<Question> questions;
 
     @Enumerated(EnumType.STRING)

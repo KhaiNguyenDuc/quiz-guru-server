@@ -2,9 +2,7 @@ package com.quizguru.libraries.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.List;
 
@@ -12,6 +10,9 @@ import java.util.List;
 @Setter
 @Getter
 @Table(name = "library")
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Library {
 
     @Id

@@ -59,6 +59,7 @@ public class SecurityConfig{
                 .authorizeHttpRequests(requests -> requests
                         .requestMatchers(ALLOW_URL).permitAll()
                         .requestMatchers("/auth/api/v1/refresh-token").authenticated()
+                        .requestMatchers("/auth/api/v1/users").authenticated()
                         .anyRequest().authenticated()
                 );
         return http.build();

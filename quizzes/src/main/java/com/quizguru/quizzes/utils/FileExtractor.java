@@ -16,7 +16,7 @@ import java.util.Objects;
 public class FileExtractor {
     public static String extractDocxToString(MultipartFile file) {
         if (Objects.isNull(file)) {
-            throw new InvalidRequestException(Constant.INVALID_EMPTY_FILE_REQUEST);
+            throw new InvalidRequestException(Constant.ERROR_CODE.INVALID_EMPTY_FILE_REQUEST);
         }
         try {
             String originalFilename = file.getOriginalFilename();
@@ -27,44 +27,44 @@ public class FileExtractor {
                         return extractor.getText();
                     }
                 } else {
-                    throw new InvalidRequestException(Constant.INVALID_NOT_SUPPORTED_FILE_REQUEST);
+                    throw new InvalidRequestException(Constant.ERROR_CODE.INVALID_NOT_SUPPORTED_FILE_REQUEST);
                 }
             } else {
-                throw new InvalidRequestException(Constant.INVALID_FILE_MSG);
+                throw new InvalidRequestException(Constant.ERROR_CODE.INVALID_FILE_MSG);
             }
         } catch (IOException e) {
-            throw new InvalidRequestException(Constant.INVALID_FILE_MSG);
+            throw new InvalidRequestException(Constant.ERROR_CODE.INVALID_FILE_MSG);
         }
     }
 
     public static String extractPDFToString(MultipartFile file) {
         if (Objects.isNull(file)) {
-            throw new InvalidRequestException(Constant.INVALID_EMPTY_FILE_REQUEST);
+            throw new InvalidRequestException(Constant.ERROR_CODE.INVALID_EMPTY_FILE_REQUEST);
         }
         String originalFilename = file.getOriginalFilename();
         if (originalFilename == null || (!originalFilename.toLowerCase().endsWith(".pdf"))) {
-            throw new InvalidRequestException(Constant.INVALID_NOT_SUPPORTED_FILE_REQUEST);
+            throw new InvalidRequestException(Constant.ERROR_CODE.INVALID_NOT_SUPPORTED_FILE_REQUEST);
         }
         try (PDDocument document = Loader.loadPDF(file.getBytes())) {
             PDFTextStripper pdfStripper = new PDFTextStripper();
             return pdfStripper.getText(document);
         } catch (IOException e) {
-            throw new InvalidRequestException(Constant.INVALID_FILE_MSG);
+            throw new InvalidRequestException(Constant.ERROR_CODE.INVALID_FILE_MSG);
         }
     }
 
     public static String extractTxtToString(MultipartFile file) {
         if (Objects.isNull(file)) {
-            throw new InvalidRequestException(Constant.INVALID_EMPTY_FILE_REQUEST);
+            throw new InvalidRequestException(Constant.ERROR_CODE.INVALID_EMPTY_FILE_REQUEST);
         }
         String originalFilename = file.getOriginalFilename();
         if (originalFilename == null || (!originalFilename.toLowerCase().endsWith(".txt"))) {
-            throw new InvalidRequestException(Constant.INVALID_NOT_SUPPORTED_FILE_REQUEST);
+            throw new InvalidRequestException(Constant.ERROR_CODE.INVALID_NOT_SUPPORTED_FILE_REQUEST);
         }
         try{
             return new String(file.getBytes());
         }catch (Exception e){
-            throw new InvalidRequestException(Constant.INVALID_FILE_MSG);
+            throw new InvalidRequestException(Constant.ERROR_CODE.INVALID_FILE_MSG);
         }
     }
 }

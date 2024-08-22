@@ -10,24 +10,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RecordMapper {
-    public static List<RecordResponse> recordsToRecordResponses(List<Record> records) {
+    public static List<RecordResponse> toRecordResponses(List<Record> records) {
 
         List<RecordResponse> recordResponses = new ArrayList<>();
         for (Record record : records) {
-            RecordResponse recordResponse = RecordResponse.builder()
-                    .id(record.getId())
-                    .score(record.getScore())
-                    .duration(record.getDuration())
-                    .timeLeft(record.getTimeLeft())
-                    .quizId(record.getQuizId())
-                    .userId(record.getUserId())
-                    .build();
+            RecordResponse recordResponse = RecordMapper.toRecordResponse(record);
             recordResponses.add(recordResponse);
         }
         return recordResponses;
     }
 
-    public static RecordResponse recordToRecordResponse(Record record) {
+    public static RecordResponse toRecordResponse(Record record) {
 
        return RecordResponse.builder()
                     .id(record.getId())
@@ -39,7 +32,7 @@ public class RecordMapper {
                     .build();
     }
 
-    public static Record recordRequestToRecord(RecordRequest recordRequest) {
+    public static Record toRecord(RecordRequest recordRequest) {
 
         List<RecordItemRequest> recordItemRequests = recordRequest.recordItems();
         List<RecordItem> recordItems = new ArrayList<>();

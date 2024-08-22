@@ -5,11 +5,14 @@ import com.quizguru.auth.model.enums.RoleName;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.NaturalId;
 
 import java.util.List;
 
-@Data
+@Getter
+@Setter
 @Table(name = "roles")
 @Entity
 public class Role {
@@ -22,7 +25,7 @@ public class Role {
     @NaturalId
     private RoleName name;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "user_role",
             joinColumns = @JoinColumn(name = "role_id"),

@@ -2,6 +2,7 @@ package com.quizguru.auth.controller;
 
 import com.quizguru.auth.dto.request.*;
 import com.quizguru.auth.dto.response.*;
+import com.quizguru.auth.model.UserPrincipal;
 import com.quizguru.auth.model.VerificationToken;
 import com.quizguru.auth.service.AuthService;
 import com.quizguru.auth.service.PasswordResetService;
@@ -10,6 +11,7 @@ import com.quizguru.auth.service.VerificationTokenService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.CurrentSecurityContext;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -51,7 +53,7 @@ public class AuthController {
         VerificationToken token = verificationTokenService.createToken(result.id());
         verificationTokenService.sendVerifyToken(result, token);
         ApiResponse response = new ApiResponse(result, "Success");
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     @PostMapping("/verify")
@@ -88,6 +90,23 @@ public class AuthController {
 
         passwordResetService.resetPassword(resetPasswordRequest);
         ApiResponse response = new ApiResponse("OK", "Success");
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @GetMapping("/users/current")
+    public ResponseEntity<ApiResponse> findCurrentUser(
+            @CurrentSecurityContext(expression="authentication.principal") UserPrincipal userPrincipal ){
+        UserResponse userResponse = authService.findById(userPrincipal.getId());
+
+        ApiResponse response = new ApiResponse(userResponse, "Success");
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @GetMapping("/internal/users/role")
+    public ResponseEntity<ApiResponse> findRoleFromUserId(@RequestParam("userId") String userId){
+        String roleName = authService.findRoleFromUserId(userId);
+
+        ApiResponse response = new ApiResponse(roleName, "Success");
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }
