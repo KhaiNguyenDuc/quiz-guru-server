@@ -1,19 +1,24 @@
 package com.quizguru.quizzes.service.impl;
 
+import com.quizguru.quizzes.client.LibraryClient;
+import com.quizguru.quizzes.dto.request.QuizGenerateResult;
+import com.quizguru.quizzes.dto.request.QuizRequest;
+import com.quizguru.quizzes.dto.request.vocabulary.ListToVocabRequest;
+import com.quizguru.quizzes.dto.request.vocabulary.TextVocabRequest;
+import com.quizguru.quizzes.dto.response.*;
+import com.quizguru.quizzes.exception.InvalidRequestException;
+import com.quizguru.quizzes.model.Question;
 import com.quizguru.quizzes.producer.GenerateProducer;
 import com.quizguru.quizzes.dto.request.text.BaseRequest;
 import com.quizguru.quizzes.dto.request.text.HandledFileRequest;
 import com.quizguru.quizzes.dto.request.text.RawFileRequest;
 import com.quizguru.quizzes.dto.request.vocabulary.HandledFileVocabRequest;
 import com.quizguru.quizzes.dto.request.vocabulary.RawFileVocabRequest;
-import com.quizguru.quizzes.dto.request.vocabulary.TextVocabRequest;
-import com.quizguru.quizzes.dto.response.GenerateQuizResponse;
-import com.quizguru.quizzes.dto.response.PageResponse;
-import com.quizguru.quizzes.dto.response.QuizResponse;
 import com.quizguru.quizzes.exception.AccessDeniedException;
 import com.quizguru.quizzes.exception.ResourceNotFoundException;
 import com.quizguru.quizzes.mapper.QuizMapper;
 import com.quizguru.quizzes.model.Quiz;
+import com.quizguru.quizzes.repository.QuestionRepository;
 import com.quizguru.quizzes.repository.QuizRepository;
 import com.quizguru.quizzes.service.QuizService;
 import com.quizguru.quizzes.utils.AuthProvider;
@@ -22,9 +27,15 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -34,97 +45,157 @@ public class QuizServiceImpl implements QuizService {
 
     private final GenerateProducer generateProducer;
     private final QuizRepository quizRepository;
+    private final QuestionRepository questionRepository;
+    private final LibraryClient libraryClient;
 
     @Override
     public GenerateQuizResponse createQuizByText(BaseRequest baseRequest) {
-        Quiz quiz = QuizMapper.generateRequestToQuiz(baseRequest);
-        quiz.setUserId(AuthProvider.getUserId());
+        String userId = AuthProvider.getUserId();
+        Quiz quiz = QuizMapper.toQuiz(baseRequest);
+        quiz.setUserId(userId);
         Quiz quizSaved = quizRepository.save(quiz);
-        generateProducer.publishGenerateRequest(baseRequest);
+        generateProducer.publishGenerateRequest(baseRequest.withId(userId, quizSaved.getId()));
         return QuizMapper.quizToGenerateQuizResponse(quizSaved);
     }
 
     @Override
     public GenerateQuizResponse createQuizByDocFile(RawFileRequest rawFileRequest) {
-        Quiz quiz = QuizMapper.fileRequestToQuiz(rawFileRequest);
-        quiz.setUserId(AuthProvider.getUserId());
+        String userId = AuthProvider.getUserId();
+        Quiz quiz = QuizMapper.toQuiz(rawFileRequest);
+        quiz.setUserId(userId);
         Quiz quizSaved = quizRepository.save(quiz);
-        HandledFileRequest docFileVocabRequest = QuizMapper.fileToDocFileRequest(rawFileRequest);
+        HandledFileRequest docFileVocabRequest = QuizMapper.toDocFileRequest(rawFileRequest, quizSaved.getId());
         generateProducer.publishDocFileVocabRequest(docFileVocabRequest);
         return QuizMapper.quizToGenerateQuizResponse(quizSaved);
     }
 
     @Override
     public GenerateQuizResponse createQuizByPdfFile(RawFileRequest rawFileRequest) {
-        Quiz quiz = QuizMapper.fileRequestToQuiz(rawFileRequest);
+        Quiz quiz = QuizMapper.toQuiz(rawFileRequest);
         quiz.setUserId(AuthProvider.getUserId());
         Quiz quizSaved = quizRepository.save(quiz);
-        HandledFileRequest docFileVocabRequest = QuizMapper.fileToPdfFileRequest(rawFileRequest);
+        HandledFileRequest docFileVocabRequest = QuizMapper.toPdfFileRequest(rawFileRequest, quizSaved.getId());
         generateProducer.publishDocFileVocabRequest(docFileVocabRequest);
         return QuizMapper.quizToGenerateQuizResponse(quizSaved);
     }
 
     @Override
     public GenerateQuizResponse createQuizByTxtFile(RawFileRequest rawFileRequest) {
-        Quiz quiz = QuizMapper.fileRequestToQuiz(rawFileRequest);
+        Quiz quiz = QuizMapper.toQuiz(rawFileRequest);
         quiz.setUserId(AuthProvider.getUserId());
         Quiz quizSaved = quizRepository.save(quiz);
-        HandledFileRequest docFileVocabRequest = QuizMapper.fileToTxtFileRequest(rawFileRequest);
+        HandledFileRequest docFileVocabRequest = QuizMapper.toTxtFileRequest(rawFileRequest, quizSaved.getId());
         generateProducer.publishDocFileVocabRequest(docFileVocabRequest);
         return QuizMapper.quizToGenerateQuizResponse(quizSaved);
 
     }
 
     @Override
+    public void updateQuiz(QuizGenerateResult quizGenerateResult) {
+        QuizRequest quizRequest = quizGenerateResult.quizRequest();
+        Quiz quiz = quizRepository.findById(quizGenerateResult.quizId())
+                        .orElseThrow(() -> new ResourceNotFoundException(Constant.ERROR_CODE.RESOURCE_NOT_FOUND,  "Quiz", quizGenerateResult.quizId()));
+
+        List<Question> questions = QuizMapper.toQuestions(quizRequest.questions(), quiz);
+        for(Question question: questions){
+            for (Integer answer: question.getAnswers()){
+                question.setAnswer(answer, question.getChoices());
+            }
+        }
+
+        quiz.setQuestions(questions);
+        quizRepository.save(quiz);
+    }
+
+    @Override
     public GenerateQuizResponse createVocabularyQuizByText(TextVocabRequest textVocabRequest) {
-        Quiz quiz = QuizMapper.textVocabRequestToQuiz(textVocabRequest);
+        String userId = AuthProvider.getUserId();
+        Quiz quiz = QuizMapper.toQuiz(textVocabRequest);
         quiz.setUserId(AuthProvider.getUserId());
         Quiz quizSaved = quizRepository.save(quiz);
-        generateProducer.publishTextVocabRequest(textVocabRequest);
+        generateProducer.publishTextVocabRequest(textVocabRequest.withId(userId, quizSaved.getId()));
+        return QuizMapper.quizToGenerateQuizResponse(quizSaved);
+    }
+
+    @Override
+    public DetailQuizResponse findDetailQuizById(String quizId) {
+        String userId = AuthProvider.getUserId();
+        Quiz quiz = quizRepository.findById(quizId)
+                .orElseThrow(() -> new ResourceNotFoundException(Constant.ERROR_CODE.RESOURCE_NOT_FOUND, "Quiz", quizId));
+        if(!userId.equals(quiz.getUserId())){
+            throw new AccessDeniedException(Constant.ERROR_CODE.ACCESS_DENIED, "Quiz", quizId);
+        }
+        try{
+            ApiResponse<WordSetResponse> apiResponse = libraryClient.findWordSetByQuizId(quizId).getBody();
+            WordSetResponse wordSetResponse;
+            if(Objects.nonNull(apiResponse)){
+                wordSetResponse = apiResponse.data();
+                return QuizMapper.toDetailQuizResponse(quiz, wordSetResponse);
+            }else{
+                throw new InvalidRequestException(Constant.ERROR_CODE.INVALID_REQUEST_MSG, "Library service down");
+            }
+
+        }catch (ResponseStatusException ex){
+            if (ex.getStatusCode() == HttpStatus.NOT_FOUND){
+                throw new ResourceNotFoundException(Constant.ERROR_CODE.RESOURCE_NOT_FOUND,  "Quiz", quizId);
+            }
+            throw new InvalidRequestException(Constant.ERROR_CODE.INVALID_REQUEST_MSG, ex.getMessage());
+        }
+
+    }
+
+    @Override
+    public GenerateQuizResponse createVocabularyQuizByList(ListToVocabRequest listVocabRequest) {
+        String userId = AuthProvider.getUserId();
+        Quiz quiz = QuizMapper.toQuiz(listVocabRequest);
+        quiz.setUserId(AuthProvider.getUserId());
+        Quiz quizSaved = quizRepository.save(quiz);
+        generateProducer.publishListVocabRequest(listVocabRequest.withId(userId, quizSaved.getId()));
         return QuizMapper.quizToGenerateQuizResponse(quizSaved);
     }
 
     @Override
     public GenerateQuizResponse createVocabularyQuizByDocFile(RawFileVocabRequest rawFileVocabRequest){
-        Quiz quiz = QuizMapper.fileVocabRequestToQuiz(rawFileVocabRequest);
-        quiz.setUserId(AuthProvider.getUserId());
+        String userId = AuthProvider.getUserId();
+        Quiz quiz = QuizMapper.toQuiz(rawFileVocabRequest);
+        quiz.setUserId(userId);
         Quiz quizSaved = quizRepository.save(quiz);
-        HandledFileVocabRequest docFileVocabRequest = QuizMapper.fileVocabToDocFileVocabRequest(rawFileVocabRequest);
+        HandledFileVocabRequest docFileVocabRequest = QuizMapper.toDocFileVocabRequest(rawFileVocabRequest, quizSaved.getId());
         generateProducer.publishDocFileVocabRequest(docFileVocabRequest);
         return QuizMapper.quizToGenerateQuizResponse(quizSaved);
     }
 
     @Override
     public GenerateQuizResponse createVocabularyQuizByPDFFile(RawFileVocabRequest rawFileVocabRequest) {
-        Quiz quiz = QuizMapper.fileVocabRequestToQuiz(rawFileVocabRequest);
-        quiz.setUserId(AuthProvider.getUserId());
+        String userId = AuthProvider.getUserId();
+        Quiz quiz = QuizMapper.toQuiz(rawFileVocabRequest);
+        quiz.setUserId(userId);
         Quiz quizSaved = quizRepository.save(quiz);
-        HandledFileVocabRequest pdfFileVocabRequest = QuizMapper.fileVocabToPdfFileVocabRequest(rawFileVocabRequest);
+        HandledFileVocabRequest pdfFileVocabRequest = QuizMapper.toPdfFileVocabRequest(rawFileVocabRequest, quizSaved.getId());
         generateProducer.publishDocFileVocabRequest(pdfFileVocabRequest);
         return QuizMapper.quizToGenerateQuizResponse(quizSaved);
     }
 
     @Override
     public GenerateQuizResponse createVocabularyQuizByTxtFile(RawFileVocabRequest rawFileVocabRequest) {
-        Quiz quiz = QuizMapper.fileVocabRequestToQuiz(rawFileVocabRequest);
-        quiz.setUserId(AuthProvider.getUserId());
+        String userId = AuthProvider.getUserId();
+        Quiz quiz = QuizMapper.toQuiz(rawFileVocabRequest);
+        quiz.setUserId(userId);
         Quiz quizSaved = quizRepository.save(quiz);
-        HandledFileVocabRequest pdfFileVocabRequest = QuizMapper.fileVocabToTxtFileVocabRequest(rawFileVocabRequest);
+        HandledFileVocabRequest pdfFileVocabRequest = QuizMapper.toTxtFileVocabRequest(rawFileVocabRequest, quizSaved.getId());
         generateProducer.publishDocFileVocabRequest(pdfFileVocabRequest);
         return QuizMapper.quizToGenerateQuizResponse(quizSaved);
     }
 
     @Override
     public PageResponse<List<QuizResponse>> findAllQuizByUserId(String userId, Pageable pageable) {
-        if(!quizRepository.existsByUserId(userId)){
-            throw new ResourceNotFoundException(Constant.RESOURCE_NOT_FOUND, "user", userId);
-        }
+
         if (!AuthProvider.getUserId().equals(userId)){
-            throw new AccessDeniedException(Constant.ACCESS_DENIED, "user", userId);
+            throw new AccessDeniedException(Constant.ERROR_CODE.ACCESS_DENIED, "user", userId);
         }
         Page<Quiz> quizzes = quizRepository.findAllByUserId(userId, pageable);
 
-        List<QuizResponse> quizResponses = QuizMapper.quizzesToQuizResponses(quizzes.getContent());
+        List<QuizResponse> quizResponses = QuizMapper.toQuizResponses(quizzes.getContent());
 
         return new PageResponse<>(
                 quizResponses,
@@ -139,11 +210,11 @@ public class QuizServiceImpl implements QuizService {
     public QuizResponse findQuizById(String quizId) {
         String userId = AuthProvider.getUserId();
         Quiz quiz = quizRepository.findById(quizId)
-                .orElseThrow(() -> new ResourceNotFoundException(Constant.RESOURCE_NOT_FOUND, "Quiz", quizId));
+                .orElseThrow(() -> new ResourceNotFoundException(Constant.ERROR_CODE.RESOURCE_NOT_FOUND, "Quiz", quizId));
         if(!userId.equals(quiz.getUserId())){
-            throw new AccessDeniedException(Constant.ACCESS_DENIED, "Quiz", quizId);
+            throw new AccessDeniedException(Constant.ERROR_CODE.ACCESS_DENIED, "Quiz", quizId);
         }
-        return QuizMapper.quizToQuizResponse(quiz);
+        return QuizMapper.toQuizResponse(quiz);
     }
 
     @Override
@@ -151,12 +222,12 @@ public class QuizServiceImpl implements QuizService {
 
         Optional<Quiz> quizOpt = quizRepository.findById(quizId);
         if(quizOpt.isEmpty()){
-            throw new ResourceNotFoundException(Constant.RESOURCE_NOT_FOUND, "quiz", quizId);
+            throw new ResourceNotFoundException(Constant.ERROR_CODE.RESOURCE_NOT_FOUND, "quiz", quizId);
         }
         Quiz quiz = quizOpt.get();
         String userId = SecurityContextHolder.getContext().getAuthentication().getName();
         if(!userId.equals(quiz.getUserId())){
-            throw new AccessDeniedException(Constant.ACCESS_DENIED, "quiz", quizId);
+            throw new AccessDeniedException(Constant.ERROR_CODE.ACCESS_DENIED, "quiz", quizId);
         }
         quiz.setIsDeleted(true);
         quizRepository.save(quiz);

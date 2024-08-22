@@ -29,7 +29,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -88,6 +87,9 @@ public class LibraryServiceImpl implements LibraryService {
 
         for(WordRequest wordRequest : wordSetRequest.words()){
             Word word = new Word();
+            word.setName("");
+            word.setContent("");
+            word.setDefinition("");
             if(Objects.nonNull(wordRequest.name())){
                 word.setName(wordRequest.name().toLowerCase().trim());
             }
@@ -142,7 +144,7 @@ public class LibraryServiceImpl implements LibraryService {
         WordSetResponse wordSetResponse = WordSetMapper.toWordSetResponse(wordSet);
 
         return PageResponse.<WordSetResponse>builder()
-                .content(wordSetResponse)
+                .data(wordSetResponse)
                 .size(pageable.getPageSize())
                 .page(pageable.getPageNumber())
                 .totalElements(words.getNumberOfElements())
@@ -186,6 +188,65 @@ public class LibraryServiceImpl implements LibraryService {
 
         wordSet.setQuizId(quizId);
         wordSetRepository.save(wordSet);
+    }
+
+    @Override
+    public void addWordToWordSet(WordSetRequest wordSetRequest) {
+
+        String wordSetId = wordSetRequest.id();
+        Optional<WordSet> wordSetOpt = wordSetRepository.findById(wordSetId);
+
+        if(wordSetOpt.isEmpty()){
+            throw new ResourceNotFoundException(Constant.RESOURCE_NOT_FOUND, "wordSet", "wordSet", wordSetId);
+        }
+        WordSet wordSet = wordSetOpt.get();
+
+        List<Word> words = new ArrayList<>();
+        for(WordRequest wordRequest : wordSetRequest.words()){
+            if(!wordRepository.existsByNameAndWordSet(wordRequest.name(), wordSet)){
+                Word word = new Word();
+                word.setName(wordRequest.name());
+                word.setDefinition(wordRequest.definition());
+                word.setWordSet(wordSet);
+                words.add(word);
+            }
+        }
+        wordRepository.saveAll(words);
+
+        wordSet.setWordNumber(wordSet.getWordNumber() + words.size());
+        wordSetRepository.save(wordSet);
+    }
+
+    @Override
+    public String create(String userId) {
+        Library library = Library.builder()
+                .userId(userId)
+                .build();
+        Library librarySaved = libraryRepository.save(library);
+        return librarySaved.getId();
+    }
+
+    @Override
+    public PageResponse<List<WordSetResponse>> findCurrentUserWordSets(String userId, Pageable pageable) {
+        Library library = libraryRepository.findByUserId(userId)
+                .orElseThrow(() -> new ResourceNotFoundException(Constant.RESOURCE_NOT_FOUND, "library", "library", userId));
+        Page<WordSet> wordSet = wordSetRepository.findAllByLibrary(library, pageable);
+        List<WordSetResponse> wordSetResponses = WordSetMapper.toWordSetResponses(wordSet.getContent());
+
+        return PageResponse.<List<WordSetResponse>>builder()
+                .data(wordSetResponses)
+                .size(pageable.getPageSize())
+                .page(pageable.getPageNumber())
+                .totalElements(wordSet.getNumberOfElements())
+                .totalPages(wordSet.getTotalPages())
+                .build();
+    }
+
+    @Override
+    public WordSetResponse findWordSetByQuizId(String quizId) {
+        WordSet wordSet = wordSetRepository.findByQuizId(quizId)
+                .orElseThrow(() -> new ResourceNotFoundException(Constant.RESOURCE_NOT_FOUND, "wordSet", "wordSet", quizId));
+        return WordSetMapper.toWordSetResponse(wordSet);
     }
 
     @Override

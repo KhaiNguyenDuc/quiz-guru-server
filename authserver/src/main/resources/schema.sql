@@ -13,6 +13,7 @@ CREATE TABLE users (
    email VARCHAR(255) NOT NULL,
    username VARCHAR(255) NOT NULL,
    password VARCHAR(255) NOT NULL UNIQUE,
+   library_id CHAR(36) NOT NULL,
    is_enabled INT NOT NULL
 );
 

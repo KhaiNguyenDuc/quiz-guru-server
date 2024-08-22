@@ -10,6 +10,7 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 public abstract class PromptRequest {
 
+    public String quizId;
     public QuizType type;
     public Integer number;
     public String language;

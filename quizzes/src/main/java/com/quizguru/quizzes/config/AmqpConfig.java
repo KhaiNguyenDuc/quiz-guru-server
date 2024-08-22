@@ -39,6 +39,11 @@ public class AmqpConfig {
     }
 
     @Bean
+    public Queue listVocabQueue() {
+        return new Queue(this.amqpProperties.getQueues().getListVocab());
+    }
+
+    @Bean
     public Binding bindingGenerateRequest() {
         return BindingBuilder
                 .bind(generationQueue())
@@ -61,6 +66,15 @@ public class AmqpConfig {
                 .to(internalTopicExchange())
                 .with(this.amqpProperties.getRoutingKeys().getInternalFileVocab());
     }
+
+    @Bean
+    public Binding bindingListVocabRequest() {
+        return BindingBuilder
+                .bind(listVocabQueue())
+                .to(internalTopicExchange())
+                .with(this.amqpProperties.getRoutingKeys().getInternalListVocab());
+    }
+
 
     @Bean
     public AmqpTemplate amqpTemplate () {

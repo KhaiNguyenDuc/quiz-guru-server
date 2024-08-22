@@ -1,6 +1,7 @@
 package com.quizguru.records.service.impl;
 
 import com.quizguru.records.dto.request.RecordRequest;
+import com.quizguru.records.dto.response.PageResponse;
 import com.quizguru.records.dto.response.RecordResponse;
 import com.quizguru.records.exception.AccessDeniedException;
 import com.quizguru.records.exception.ResourceNotFoundException;
@@ -10,6 +11,8 @@ import com.quizguru.records.repository.RecordRepository;
 import com.quizguru.records.service.RecordService;
 import com.quizguru.records.utils.Constant;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,27 +22,12 @@ import java.util.List;
 public class RecordServiceImpl implements RecordService {
 
     private final RecordRepository recordRepository;
-    @Override
-    public List<RecordResponse> findByUserId(String userId) {
-        if(recordRepository.existsByUserId(userId)){
-            List<Record> records = recordRepository.findByUserId(userId);
-            if(!records.isEmpty()){
-                records.forEach(record -> {
-                    if(!record.getUserId().equals(userId)){
-                        throw new AccessDeniedException(Constant.ACCESS_DENIED, "record", record.getId());
-                    }
-                });
-            }
-            return RecordMapper.recordsToRecordResponses(records);
-        }
-        throw new ResourceNotFoundException(Constant.RESOURCE_NOT_FOUND, "user", userId);
-    }
 
     @Override
     public RecordResponse createRecord(RecordRequest recordRequest) {
-        Record record = RecordMapper.recordRequestToRecord(recordRequest);
+        Record record = RecordMapper.toRecord(recordRequest);
         Record recordSaved = recordRepository.save(record);
-        return RecordMapper.recordToRecordResponse(recordSaved);
+        return RecordMapper.toRecordResponse(recordSaved);
     }
 
     @Override
@@ -47,6 +35,21 @@ public class RecordServiceImpl implements RecordService {
         Record record = recordRepository.findById(recordId).orElseThrow(
                 () -> new ResourceNotFoundException(Constant.RESOURCE_NOT_FOUND, "record", recordId)
         );
-        return RecordMapper.recordToRecordResponse(record);
+        return RecordMapper.toRecordResponse(record);
+    }
+
+    @Override
+    public PageResponse<List<RecordResponse>> findAllById(String userId, Pageable pageable) {
+
+            Page<Record> records = recordRepository.findByUserId(userId, pageable);
+            List<RecordResponse> recordResponses = RecordMapper.toRecordResponses(records.getContent());
+
+            return new PageResponse<>(
+                    recordResponses,
+                    pageable.getPageNumber(),
+                    pageable.getPageSize(),
+                    records.getTotalPages(),
+                    records.getNumberOfElements()
+            );
     }
 }

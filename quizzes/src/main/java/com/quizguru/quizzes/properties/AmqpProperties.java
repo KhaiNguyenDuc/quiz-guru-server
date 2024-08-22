@@ -28,6 +28,7 @@ public class AmqpProperties {
         private String generation;
         private String textVocab;
         private String fileVocab;
+        private String listVocab;
     }
 
     @Getter
@@ -36,5 +37,6 @@ public class AmqpProperties {
         private String internalGeneration;
         private String internalTextVocab;
         private String internalFileVocab;
+        private String internalListVocab;
     }
 }

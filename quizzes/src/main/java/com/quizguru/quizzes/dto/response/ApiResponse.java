@@ -1,4 +1,4 @@
 package com.quizguru.quizzes.dto.response;
 
-public record ApiResponse(Object data, String message) {
+public record ApiResponse<T>(T data, String message) {
 }

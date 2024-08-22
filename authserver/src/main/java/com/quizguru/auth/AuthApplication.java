@@ -8,6 +8,7 @@ import com.quizguru.auth.properties.VerificationTokenProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 
 @SpringBootApplication
 @EnableConfigurationProperties({
@@ -17,6 +18,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 		AmqpProperties.class,
 		PasswordResetTokenProperties.class
 })
+@EnableFeignClients
 public class AuthApplication {
 
 	public static void main(String[] args) {

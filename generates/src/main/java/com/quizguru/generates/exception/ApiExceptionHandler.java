@@ -14,7 +14,7 @@ import org.springframework.web.context.request.WebRequest;
 public class ApiExceptionHandler {
 
     @ExceptionHandler(UnauthorizedException.class)
-    public ResponseEntity<ExceptionDetails> unauthorized(
+    public ResponseEntity<ExceptionDetails> handleUnauthorizedException(
             UnauthorizedException ex, WebRequest request
     ){
         ExceptionDetails details = new ExceptionDetails(
@@ -23,5 +23,17 @@ public class ApiExceptionHandler {
                 ex.getMessage());
 
         return new ResponseEntity<>(details, HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<ExceptionDetails> handleResourceNotFoundExceptionDetailsResponseEntity(
+            ResourceNotFoundException ex, WebRequest request
+    ){
+        ExceptionDetails details = new ExceptionDetails(
+                HttpStatus.NOT_FOUND.toString(),
+                HttpStatus.NOT_FOUND.getReasonPhrase(),
+                ex.getMessage());
+
+        return new ResponseEntity<>(details, HttpStatus.NOT_FOUND);
     }
 }

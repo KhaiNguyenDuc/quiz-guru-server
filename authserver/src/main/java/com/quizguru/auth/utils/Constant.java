@@ -23,5 +23,6 @@ public final class Constant {
         public static final String PASSWORD_RESET_TOKEN_EXPIRED = "PASSWORD_RESET_TOKEN_EXPIRED";
         public static final String INVALID_CREDENTIALS = "INVALID_CREDENTIALS";
         public static final String SOMETHING_WENT_WRONG = "SOMETHING_WENT_WRONG";
+        public static final String ACCESS_DENIED_MSG = "ACCESS_DENIED_MSG";
     }
 }

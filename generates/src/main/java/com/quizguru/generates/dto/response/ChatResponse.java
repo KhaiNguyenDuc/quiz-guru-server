@@ -13,7 +13,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ChatResponse {
+public class    ChatResponse {
 
     private List<Choice> choices;
 

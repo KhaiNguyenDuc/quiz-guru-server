@@ -2,10 +2,7 @@ package com.quizguru.libraries.dto.request;
 
 import lombok.Data;
 
-@Data
-public class BindRequest {
+public record BindRequest(String quizId, String wordSetId) {
 
-    private String quizId;
-
-    private String wordSetId;
 }
+

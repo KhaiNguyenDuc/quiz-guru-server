@@ -10,6 +10,9 @@ import java.util.List;
 @Data
 @Entity
 @Table(name = "questions")
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Question {
 
     @Id
