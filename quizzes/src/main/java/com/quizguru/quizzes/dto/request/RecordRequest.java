@@ -1,4 +1,5 @@
-package com.quizguru.records.dto.request;
+package com.quizguru.quizzes.dto.request;
+
 
 import lombok.Builder;
 

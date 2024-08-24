@@ -1,6 +1,7 @@
 package com.quizguru.quizzes.controller;
 
 import com.quizguru.quizzes.dto.request.QuizGenerateResult;
+import com.quizguru.quizzes.dto.request.RecordRequest;
 import com.quizguru.quizzes.dto.request.text.RawFileRequest;
 import com.quizguru.quizzes.dto.request.vocabulary.ListToVocabRequest;
 import com.quizguru.quizzes.dto.request.vocabulary.RawFileVocabRequest;
@@ -16,7 +17,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.CurrentSecurityContext;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 @RestController
@@ -120,14 +120,25 @@ public class QuizController {
         return new ResponseEntity<>(new ApiResponse<>(response, "success"), HttpStatus.OK);
     }
 
+    @PostMapping("/internal/prov/record")
+    ResponseEntity<ApiResponse<ProvRecordResponse>> findProvisionDataForRecordById(
+            @RequestParam("id") String quizId,
+            @RequestBody RecordRequest recordRequest
+    ) {
+        ProvRecordResponse responses = quizService.findProvisionDataForRecordById(quizId, recordRequest);
+        return new ResponseEntity<>(new ApiResponse<>(responses, "success"), HttpStatus.OK);
+    }
+
     @DeleteMapping
     public ResponseEntity<ApiResponse<String>> deleteById(@RequestParam("id") String quizId){
         quizService.deleteById(quizId);
         return new ResponseEntity<>(new ApiResponse<>("", "success"), HttpStatus.OK);
     }
 
-    @PutMapping("/internal/create")
-    public void updateQuiz(@RequestBody QuizGenerateResult quizGenerateResult){
+    @PutMapping("/internal")
+    public ResponseEntity<ApiResponse<String>> updateQuiz(@RequestBody QuizGenerateResult quizGenerateResult){
         quizService.updateQuiz(quizGenerateResult);
+        return new ResponseEntity<>(new ApiResponse<>("success", "success"), HttpStatus.OK);
     }
+
 }

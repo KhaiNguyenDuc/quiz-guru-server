@@ -8,11 +8,11 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 
 @Repository
 public interface QuizRepository extends JpaRepository<Quiz, String> {
     @Query("SELECT q FROM Quiz q WHERE q.isDeleted = false AND q.userId = :userId")
     Page<Quiz> findAllByUserId(@Param("userId") String userId, Pageable pageable);
-
-    boolean existsByUserId(String userId);
 }

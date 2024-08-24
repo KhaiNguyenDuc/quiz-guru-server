@@ -20,6 +20,8 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.messaging.Message;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @AllArgsConstructor
 @Slf4j
 @Component
@@ -48,11 +50,16 @@ public class GenerateConsumer {
     @RabbitListener(queues = "#{amqpProperties.queues.listVocab}" )
     public void generateQuizVocabByListConsumer(GenerateVocabByListRequest generateVocabByListRequest) {
 
+        List<String> lowerCaseWords = generateVocabByListRequest.names().stream()
+                .map(String::toLowerCase)
+                .map(String::trim)
+                .toList();// Remove leading and trailing spaces
+
         ListVocabRequest listVocabRequest = ListVocabRequest.builder()
                 .quizId(generateVocabByListRequest.quizId())
                 .wordSetId(generateVocabByListRequest.wordSetId())
                 .wordSetName(generateVocabByListRequest.wordSetName())
-                .names(generateVocabByListRequest.names())
+                .names(lowerCaseWords)
                 .number(generateVocabByListRequest.number())
                 .level(Level.valueOf(generateVocabByListRequest.level()))
                 .language(generateVocabByListRequest.language())

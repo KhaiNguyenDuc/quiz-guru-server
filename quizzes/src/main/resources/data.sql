@@ -1,7 +1,7 @@
 -- Insert data into quizzes table
-INSERT INTO quizzes (id, given_text, type, number, language, level, duration, is_deleted, user_id, word_set_id) VALUES
-    ('550e8400-e29b-41d4-a716-446655440000', 'Vocabulary Quiz 1', 'SINGLE_CHOICE_QUESTION', 1, 'English', 'EASY', 30, FALSE, 'user-id-1', 'wordset-id-1'),
-    ('550e8400-e29b-41d4-a716-446655440001', 'Vocabulary Quiz 2', 'MULTIPLE_CHOICE_QUESTION', 2, 'Spanish', 'MEDIUM', 45, FALSE, 'user-id-2', 'wordset-id-1');
+INSERT INTO quizzes (id, given_text, type, number, language, level, duration, is_deleted, user_id) VALUES
+    ('550e8400-e29b-41d4-a716-446655440000', 'Vocabulary Quiz 1', 'SINGLE_CHOICE_QUESTION', 1, 'English', 'EASY', 30, FALSE, 'user-id-1'),
+    ('550e8400-e29b-41d4-a716-446655440001', 'Vocabulary Quiz 2', 'MULTIPLE_CHOICE_QUESTION', 2, 'Spanish', 'MEDIUM', 45, FALSE, 'user-id-2');
 
 -- Insert data into questions table
 INSERT INTO questions (id, query, explanation, type, quiz_id) VALUES

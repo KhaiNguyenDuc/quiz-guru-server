@@ -16,8 +16,7 @@ CREATE TABLE quizzes (
     level VARCHAR(50),
     duration INT,
     is_deleted BOOLEAN DEFAULT FALSE,
-    user_id VARCHAR(36),
-    word_set_id VARCHAR(36)
+    user_id VARCHAR(36)
 );
 
 CREATE TABLE questions (
