@@ -3,10 +3,14 @@ package com.quizguru.quizzes.service.impl;
 import com.quizguru.quizzes.client.LibraryClient;
 import com.quizguru.quizzes.dto.request.QuizGenerateResult;
 import com.quizguru.quizzes.dto.request.QuizRequest;
+import com.quizguru.quizzes.dto.request.RecordItemRequest;
+import com.quizguru.quizzes.dto.request.RecordRequest;
 import com.quizguru.quizzes.dto.request.vocabulary.ListToVocabRequest;
 import com.quizguru.quizzes.dto.request.vocabulary.TextVocabRequest;
 import com.quizguru.quizzes.dto.response.*;
 import com.quizguru.quizzes.exception.InvalidRequestException;
+import com.quizguru.quizzes.mapper.ProvMapper;
+import com.quizguru.quizzes.model.Choice;
 import com.quizguru.quizzes.model.Question;
 import com.quizguru.quizzes.producer.GenerateProducer;
 import com.quizguru.quizzes.dto.request.text.BaseRequest;
@@ -23,17 +27,17 @@ import com.quizguru.quizzes.repository.QuizRepository;
 import com.quizguru.quizzes.service.QuizService;
 import com.quizguru.quizzes.utils.AuthProvider;
 import com.quizguru.quizzes.utils.Constant;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -141,6 +145,40 @@ public class QuizServiceImpl implements QuizService {
             }
             throw new InvalidRequestException(Constant.ERROR_CODE.INVALID_REQUEST_MSG, ex.getMessage());
         }
+    }
+
+    @Override
+    public ProvRecordResponse findProvisionDataForRecordById(String quizId, RecordRequest recordRequest) {
+
+        Quiz quiz = quizRepository.findById(quizId)
+                .orElseThrow(() -> new ResourceNotFoundException(Constant.ERROR_CODE.RESOURCE_NOT_FOUND, "Quiz", quizId));
+
+        try{
+            List<RecordItemResponse> recordItemResponses = new ArrayList<>();
+            List<RecordItemRequest> recordItemRequests = recordRequest.recordItems();
+            for(RecordItemRequest recordItemRequest: recordItemRequests){
+                Question question = questionRepository.findById(recordItemRequest.questionId())
+                        .orElseThrow(() -> new ResourceNotFoundException(Constant.ERROR_CODE.RESOURCE_NOT_FOUND, "Question", recordItemRequest.questionId()));
+
+                QuestionResponse questionResponse = QuizMapper.toQuestionResponse(question);
+                List<ChoiceResponse> selectedChoiceResponses = questionResponse.choices().stream().filter(
+                        choiceResponse -> recordItemRequest.selectedChoiceIds().contains(choiceResponse.id())
+                ).toList();
+                RecordItemResponse recordItemResponse = RecordItemResponse.builder()
+                        .question(questionResponse)
+                        .selectedChoices(selectedChoiceResponses)
+                        .build();
+                recordItemResponses.add(recordItemResponse);
+            }
+            return ProvRecordResponse.builder()
+                    .recordItemResponses(recordItemResponses)
+                    .duration(quiz.getDuration())
+                    .givenText(quiz.getGivenText())
+                    .build();
+
+        }catch (Exception ex){
+            throw new InvalidRequestException(Constant.ERROR_CODE.INVALID_REQUEST_MSG, ex.getMessage());
+        }
 
     }
 
@@ -218,6 +256,7 @@ public class QuizServiceImpl implements QuizService {
     }
 
     @Override
+    @Transactional
     public void deleteById(String quizId) {
 
         Optional<Quiz> quizOpt = quizRepository.findById(quizId);
@@ -231,6 +270,7 @@ public class QuizServiceImpl implements QuizService {
         }
         quiz.setIsDeleted(true);
         quizRepository.save(quiz);
+        libraryClient.removeQuiz(quiz.getId());
     }
 
 }

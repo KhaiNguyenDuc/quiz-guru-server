@@ -33,14 +33,14 @@ public class RecordController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse> createRecord(@RequestBody RecordRequest recordRequest) {
+    public ResponseEntity<ApiResponse<RecordResponse>> createRecord(@RequestBody RecordRequest recordRequest) {
         RecordResponse records = recordService.createRecord(recordRequest);
-        return new ResponseEntity<>(new ApiResponse(records, "success"), HttpStatus.CREATED);
+        return new ResponseEntity<>(new ApiResponse<>(records, "success"), HttpStatus.CREATED);
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse> findByd(@RequestParam("id") String recordId) {
+    public ResponseEntity<ApiResponse<RecordResponse>> findByd(@RequestParam("id") String recordId) {
         RecordResponse record = recordService.findById(recordId);
-        return new ResponseEntity<>(new ApiResponse(record, "success"), HttpStatus.OK);
+        return new ResponseEntity<>(new ApiResponse<>(record, "success"), HttpStatus.OK);
     }
 }

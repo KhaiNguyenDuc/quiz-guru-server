@@ -2,6 +2,9 @@ package com.quizguru.records.dto.response;
 
 import lombok.Builder;
 
+import java.util.List;
+
 @Builder
-public record RecordResponse(String id, Integer score, Integer duration, Integer timeLeft, String userId, String quizId) {
+public record RecordResponse(String id, Integer score, Integer duration, Integer timeLeft, String userId, String quizId,
+                             List<RecordItemResponse> recordItems, String givenText) {
 }

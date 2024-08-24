@@ -38,5 +38,18 @@ public class ApiExceptionHandler {
 
         return new ResponseEntity<>(details, HttpStatus.FORBIDDEN);
     }
+
+    @ExceptionHandler(InvalidRequestException.class)
+    public ResponseEntity<ExceptionDetails> invalidRequestHandler(
+            InvalidRequestException ex, WebRequest request
+    ){
+
+        ExceptionDetails details = new ExceptionDetails(
+                HttpStatus.BAD_REQUEST.toString(),
+                HttpStatus.BAD_REQUEST.getReasonPhrase(),
+                ex.getMessage());
+
+        return new ResponseEntity<>(details, HttpStatus.BAD_REQUEST);
+    }
 }
 

@@ -9,6 +9,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 @FeignClient("LIBRARIES")
 public interface LibraryClient {
 
-    @PostMapping("/libraries/internal/create")
+    @PostMapping("/libraries/internal")
     ResponseEntity<ApiResponse> create(@RequestParam("userId") String userId);
 }

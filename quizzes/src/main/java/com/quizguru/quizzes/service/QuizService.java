@@ -1,15 +1,13 @@
 package com.quizguru.quizzes.service;
 
 import com.quizguru.quizzes.dto.request.QuizGenerateResult;
+import com.quizguru.quizzes.dto.request.RecordRequest;
 import com.quizguru.quizzes.dto.request.text.RawFileRequest;
 import com.quizguru.quizzes.dto.request.vocabulary.ListToVocabRequest;
 import com.quizguru.quizzes.dto.request.vocabulary.RawFileVocabRequest;
 import com.quizguru.quizzes.dto.request.text.BaseRequest;
 import com.quizguru.quizzes.dto.request.vocabulary.TextVocabRequest;
-import com.quizguru.quizzes.dto.response.DetailQuizResponse;
-import com.quizguru.quizzes.dto.response.GenerateQuizResponse;
-import com.quizguru.quizzes.dto.response.PageResponse;
-import com.quizguru.quizzes.dto.response.QuizResponse;
+import com.quizguru.quizzes.dto.response.*;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
@@ -41,4 +39,7 @@ public interface QuizService {
     GenerateQuizResponse createVocabularyQuizByText(TextVocabRequest textVocabRequest);
 
     DetailQuizResponse findDetailQuizById(String quizId);
+
+    ProvRecordResponse findProvisionDataForRecordById(String quizId, RecordRequest recordRequest);
+
 }

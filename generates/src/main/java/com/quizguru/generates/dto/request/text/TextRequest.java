@@ -28,7 +28,7 @@ public class TextRequest extends PromptRequest implements HasHtmlContent {
         String prompt = "";
         prompt = switch (this.type){
             case MULTIPLE_CHOICE_QUESTION -> promptConfiguration.getMultipleChoiceQuizPrompt();
-            case MIX_QUESTION -> promptConfiguration.getMixChoiceQuizPrompt();
+            case SINGLE_CHOICE_AND_MULTIPLE_CHOICE -> promptConfiguration.getMixChoiceQuizPrompt();
             default -> promptConfiguration.getSingleChoiceQuizPrompt();
         };
 

@@ -253,8 +253,7 @@ public class QuizMapper {
                 .build();
     }
 
-
-    private static QuestionResponse toQuestionResponse(Question question) {
+    public static QuestionResponse toQuestionResponse(Question question) {
          return QuestionResponse.builder()
                 .id(question.getId())
                 .type(question.getType().getValue())
@@ -290,6 +289,4 @@ public class QuizMapper {
         }
         return choiceResponses;
     }
-
-
 }

@@ -32,4 +32,7 @@ public interface LibraryService {
 
     WordSetResponse findWordSetByQuizId(String quizId);
 
+    void removeQuizByQuizId(String quizId);
+
+    void increaseReviewTime(String quizId);
 }

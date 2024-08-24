@@ -25,13 +25,13 @@ public class LibraryController {
 
     private final LibraryService libraryService;
 
-    @PostMapping("/internal/create")
+    @PostMapping("/internal")
     public ResponseEntity<ApiResponse<String>> create(@RequestParam("userId") String userId){
         String libraryId = libraryService.create(userId);
         return new ResponseEntity<>(new ApiResponse<>(libraryId, "success"), HttpStatus.OK);
     }
 
-    @PostMapping("/word-set/definition")
+    @PostMapping("/word/definition")
     public ResponseEntity<ApiResponse<List<WordResponse>>> addWordsDefinition(
             @RequestParam("id") String wordSetId,
             @RequestBody List<String> words
@@ -41,7 +41,7 @@ public class LibraryController {
         return new ResponseEntity<>(new ApiResponse<>(wordResponses, "success"), HttpStatus.OK);
     }
 
-    @PutMapping("/word-set/definition")
+    @PutMapping("/word/definition")
     public ResponseEntity<ApiResponse<WordResponse>> updateWordDefinition(
             @RequestParam(name ="id") String wordId,
             @RequestBody WordRequest wordRequest
@@ -56,7 +56,7 @@ public class LibraryController {
             @RequestBody WordSetRequest wordSetRequest
     ){
         String id = libraryService.createWordSet(wordSetRequest);
-        return new ResponseEntity<>(new ApiResponse<>("success", id), HttpStatus.CREATED);
+        return new ResponseEntity<>(new ApiResponse<>(id, "success"), HttpStatus.CREATED);
     }
 
     @PutMapping("/word-set")
@@ -115,5 +115,19 @@ public class LibraryController {
     public ResponseEntity<ApiResponse<WordSetResponse>> findWordSetByQuizId(@RequestParam("quizId") String quizId){
         WordSetResponse wordSetResponses = libraryService.findWordSetByQuizId(quizId);
         return new ResponseEntity<>(new ApiResponse<>(wordSetResponses, "success"), HttpStatus.OK);
+    }
+
+
+    @DeleteMapping("/internal/remove/word-set")
+    ResponseEntity<ApiResponse<String>> removeQuiz(@RequestParam("quizId") String quizId){
+        libraryService.removeQuizByQuizId(quizId);
+        return new ResponseEntity<>(new ApiResponse<>("success", "success"), HttpStatus.OK);
+    }
+
+    @PutMapping("/internal/review")
+    ResponseEntity<ApiResponse<String>> increaseReviewTime(@RequestParam("quizId") String quizId){
+        libraryService.increaseReviewTime(quizId);
+
+        return new ResponseEntity<>(new ApiResponse<>("success", "success"), HttpStatus.OK);
     }
 }

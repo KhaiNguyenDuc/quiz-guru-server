@@ -9,11 +9,9 @@ public record DetailQuizResponse(
         List<QuestionResponse> questions,
         String givenText,
         String type,
-        Integer number,
-        String language,
-        String level,
         Integer duration,
-        WordSetResponse wordSet
+        WordSetResponse wordSet,
+        String language
 ) {
 }
 

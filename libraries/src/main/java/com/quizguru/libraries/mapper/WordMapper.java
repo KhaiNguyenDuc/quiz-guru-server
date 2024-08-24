@@ -10,11 +10,7 @@ public class WordMapper {
     public static List<WordResponse> toWordResponses(List<Word> words) {
         List<WordResponse> wordResponses = new ArrayList<>();
         for (Word word : words) {
-            WordResponse wordResponse = WordResponse.builder()
-                    .id(word.getId())
-                    .name(word.getName())
-                    .definition(word.getDefinition())
-                    .build();
+            WordResponse wordResponse = WordMapper.toWordResponse(word);
             wordResponses.add(wordResponse);
         }
         return wordResponses;
@@ -25,6 +21,7 @@ public class WordMapper {
                 .id(word.getId())
                 .name(word.getName())
                 .definition(word.getDefinition())
+                .content(word.getContent())
                 .build();
     }
 }
