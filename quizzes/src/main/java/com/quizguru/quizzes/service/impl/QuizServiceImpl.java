@@ -1,6 +1,7 @@
 package com.quizguru.quizzes.service.impl;
 
-import com.quizguru.quizzes.client.LibraryClient;
+import com.quizguru.quizzes.client.library.LibraryClient;
+import com.quizguru.quizzes.client.library.dto.response.WordSetResponse;
 import com.quizguru.quizzes.dto.request.QuizGenerateResult;
 import com.quizguru.quizzes.dto.request.QuizRequest;
 import com.quizguru.quizzes.dto.request.RecordItemRequest;
@@ -9,8 +10,6 @@ import com.quizguru.quizzes.dto.request.vocabulary.ListToVocabRequest;
 import com.quizguru.quizzes.dto.request.vocabulary.TextVocabRequest;
 import com.quizguru.quizzes.dto.response.*;
 import com.quizguru.quizzes.exception.InvalidRequestException;
-import com.quizguru.quizzes.mapper.ProvMapper;
-import com.quizguru.quizzes.model.Choice;
 import com.quizguru.quizzes.model.Question;
 import com.quizguru.quizzes.producer.GenerateProducer;
 import com.quizguru.quizzes.dto.request.text.BaseRequest;

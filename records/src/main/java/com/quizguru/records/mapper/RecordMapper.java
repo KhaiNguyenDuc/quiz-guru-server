@@ -1,11 +1,11 @@
 package com.quizguru.records.mapper;
 
-import com.quizguru.records.dto.client.ChoiceResponse;
-import com.quizguru.records.dto.client.QuestionType;
+import com.quizguru.records.client.quiz.dto.response.ChoiceResponse;
+import com.quizguru.records.client.quiz.dto.enums.QuestionType;
 import com.quizguru.records.dto.request.RecordItemRequest;
 import com.quizguru.records.dto.request.RecordRequest;
-import com.quizguru.records.dto.response.ProvRecordResponse;
-import com.quizguru.records.dto.response.RecordItemResponse;
+import com.quizguru.records.client.quiz.dto.response.ProvRecordResponse;
+import com.quizguru.records.client.quiz.dto.response.RecordItemResponse;
 import com.quizguru.records.dto.response.RecordResponse;
 import com.quizguru.records.model.Record;
 import com.quizguru.records.model.RecordItem;
@@ -40,6 +40,7 @@ public class RecordMapper {
                     .quizId(record.getQuizId())
                     .recordItems(recordItemResponses)
                     .userId(record.getUserId())
+                    .createdAt(record.getCreatedAt())
                     .build();
     }
 
@@ -105,6 +106,7 @@ public class RecordMapper {
                 .duration(record.getDuration())
                 .timeLeft(record.getTimeLeft())
                 .quizId(record.getQuizId())
+                .createdAt(record.getCreatedAt())
                 .userId(record.getUserId())
                 .build();
     }

@@ -1,5 +1,6 @@
 package com.quizguru.quizzes.dto.response;
 
+import com.quizguru.quizzes.client.library.dto.response.WordSetResponse;
 import lombok.Builder;
 import java.util.List;
 

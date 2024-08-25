@@ -3,11 +3,13 @@ package com.quizguru.libraries.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Data
 @Entity
 @Table(name = "words")
-public class Word {
+@EqualsAndHashCode(callSuper = true)
+public class Word extends DateAudit{
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;

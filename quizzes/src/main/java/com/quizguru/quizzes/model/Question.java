@@ -13,7 +13,8 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Question {
+@EqualsAndHashCode(callSuper = true)
+public class Question extends DateAudit{
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

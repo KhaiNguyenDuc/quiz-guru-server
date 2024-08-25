@@ -3,6 +3,7 @@ package com.quizguru.auth.model;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import java.time.Instant;
 
@@ -11,7 +12,8 @@ import java.time.Instant;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class VerificationToken {
+@EqualsAndHashCode(callSuper = true)
+public class VerificationToken extends DateAudit{
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

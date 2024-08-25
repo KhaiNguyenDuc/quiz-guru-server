@@ -14,12 +14,20 @@ CREATE TABLE users (
    username VARCHAR(255) NOT NULL,
    password VARCHAR(255) NOT NULL UNIQUE,
    library_id CHAR(36) NOT NULL,
-   is_enabled INT NOT NULL
+   is_enabled INT NOT NULL,
+   created_at datetime NOT NULL,
+   updated_at datetime NOT NULL,
+   created_by VARCHAR(255) NULL,
+   updated_by VARCHAR(255) NULL
 );
 
 CREATE TABLE roles (
    id CHAR(36) NOT NULL PRIMARY KEY,
-   name ENUM('USER', 'ADMIN') NOT NULL UNIQUE
+   name ENUM('USER', 'ADMIN') NOT NULL UNIQUE,
+   created_at datetime NOT NULL,
+   updated_at datetime NOT NULL,
+   created_by VARCHAR(255) NULL,
+   updated_by VARCHAR(255) NULL
 );
 
 CREATE TABLE user_role (
@@ -35,7 +43,11 @@ CREATE TABLE refresh_token (
    token VARCHAR(255) NOT NULL,
    expired_date TIMESTAMP NOT NULL,
    user_id CHAR(36) NOT NULL,
-   FOREIGN KEY (user_id) REFERENCES users(id)
+   FOREIGN KEY (user_id) REFERENCES users(id),
+   created_at datetime NOT NULL,
+   updated_at datetime NOT NULL,
+   created_by VARCHAR(255) NULL,
+   updated_by VARCHAR(255) NULL
 );
 
 CREATE TABLE password_reset_token (
@@ -43,7 +55,11 @@ CREATE TABLE password_reset_token (
     token VARCHAR(255) NOT NULL,
     expired_date TIMESTAMP NOT NULL,
     user_id CHAR(36) NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES users(id)
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    created_at datetime NOT NULL,
+    updated_at datetime NOT NULL,
+    created_by VARCHAR(255) NULL,
+    updated_by VARCHAR(255) NULL
 );
 
 CREATE TABLE verification_token (
@@ -51,5 +67,9 @@ CREATE TABLE verification_token (
     token VARCHAR(255) NOT NULL,
     expired_date TIMESTAMP NOT NULL,
     user_id CHAR(36) NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES users(id)
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    created_at datetime NOT NULL,
+    updated_at datetime NOT NULL,
+    created_by VARCHAR(255) NULL,
+    updated_by VARCHAR(255) NULL
 );

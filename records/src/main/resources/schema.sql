@@ -13,7 +13,11 @@ CREATE TABLE records (
     duration INT,
     time_left INT,
     user_id VARCHAR(36),
-    quiz_id VARCHAR(36)
+    quiz_id VARCHAR(36),
+    created_at datetime NOT NULL,
+    updated_at datetime NOT NULL,
+    created_by VARCHAR(255) NULL,
+    updated_by VARCHAR(255) NULL
 );
 
 CREATE TABLE record_item (
@@ -21,12 +25,20 @@ CREATE TABLE record_item (
     record_id VARCHAR(36),
     question_id VARCHAR(36),
     explanation NVARCHAR(200),
-    FOREIGN KEY (record_id) REFERENCES records(id) ON DELETE CASCADE
+    FOREIGN KEY (record_id) REFERENCES records(id) ON DELETE CASCADE,
+    created_at datetime NOT NULL,
+    updated_at datetime NOT NULL,
+    created_by VARCHAR(255) NULL,
+    updated_by VARCHAR(255) NULL
 );
 
 CREATE TABLE record_item_choice (
     record_item_id VARCHAR(36),
     choice_id VARCHAR(36),
     PRIMARY KEY (record_item_id, choice_id),
-    FOREIGN KEY (record_item_id) REFERENCES record_item(id) ON DELETE CASCADE
+    FOREIGN KEY (record_item_id) REFERENCES record_item(id) ON DELETE CASCADE,
+    created_at datetime NOT NULL,
+    updated_at datetime NOT NULL,
+    created_by VARCHAR(255) NULL,
+    updated_by VARCHAR(255) NULL
 );

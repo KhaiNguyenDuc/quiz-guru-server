@@ -13,7 +13,8 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class RecordItem {
+@EqualsAndHashCode(callSuper = true)
+public class RecordItem extends DateAudit {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

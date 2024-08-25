@@ -1,5 +1,6 @@
 package com.quizguru.quizzes.mapper;
 
+import com.quizguru.quizzes.client.library.dto.response.WordSetResponse;
 import com.quizguru.quizzes.dto.request.QuestionRequest;
 import com.quizguru.quizzes.dto.request.text.BaseRequest;
 import com.quizguru.quizzes.dto.request.text.HandledFileRequest;
@@ -150,6 +151,7 @@ public class QuizMapper {
                     .type(quiz.getType().getValue())
                     .language(quiz.getLanguage())
                     .givenText(quiz.getGivenText())
+                    .createdAt(quiz.getCreatedAt())
                     .build();
             quizResponses.add(quizResponse);
         }
@@ -165,6 +167,7 @@ public class QuizMapper {
                 .type(quiz.getType().getValue())
                 .language(quiz.getLanguage())
                 .givenText(quiz.getGivenText())
+                .createdAt(quiz.getCreatedAt())
                 .build();
     }
 
