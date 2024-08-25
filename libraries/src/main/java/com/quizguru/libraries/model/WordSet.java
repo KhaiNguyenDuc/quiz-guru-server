@@ -1,6 +1,7 @@
 package com.quizguru.libraries.model;
 
 import jakarta.persistence.*;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -10,7 +11,8 @@ import java.util.List;
 @Setter
 @Entity
 @Table(name = "word_sets")
-public class WordSet {
+@EqualsAndHashCode(callSuper = true)
+public class WordSet extends DateAudit {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

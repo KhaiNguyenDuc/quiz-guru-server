@@ -2,10 +2,7 @@ package com.quizguru.quizzes.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Data
 @Entity
@@ -13,7 +10,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Choice {
+@EqualsAndHashCode(callSuper = true)
+public class Choice extends DateAudit {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

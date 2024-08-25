@@ -1,10 +1,10 @@
 package com.quizguru.generates.consumer;
 
 import com.quizguru.generates.dto.request.ChatRequest;
-import com.quizguru.generates.dto.request.client.GenerateVocabByFileRequest;
-import com.quizguru.generates.dto.request.client.GenerateVocabByListRequest;
-import com.quizguru.generates.dto.request.client.GenerateVocabByTextRequest;
-import com.quizguru.generates.dto.request.client.GenerateRequest;
+import com.quizguru.generates.consumer.dto.request.GenerateVocabByFileRequest;
+import com.quizguru.generates.consumer.dto.request.GenerateVocabByListRequest;
+import com.quizguru.generates.consumer.dto.request.GenerateVocabByTextRequest;
+import com.quizguru.generates.consumer.dto.request.GenerateRequest;
 import com.quizguru.generates.dto.request.text.TextRequest;
 import com.quizguru.generates.dto.request.vocabulary.HandledFileVocabRequest;
 import com.quizguru.generates.dto.request.vocabulary.ListVocabRequest;
@@ -17,7 +17,6 @@ import com.quizguru.generates.service.GenerateService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
-import org.springframework.messaging.Message;
 import org.springframework.stereotype.Component;
 
 import java.util.List;

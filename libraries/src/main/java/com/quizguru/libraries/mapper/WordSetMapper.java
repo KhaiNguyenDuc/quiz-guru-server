@@ -13,6 +13,7 @@ public class WordSetMapper {
                 .wordNumber(wordSet.getWordNumber())
                 .name(wordSet.getName())
                 .quizId(wordSet.getQuizId())
+                .createdAt(wordSet.getCreatedAt())
                 .reviewNumber(wordSet.getReviewNumber())
                 .words(WordMapper.toWordResponses(wordSet.getWords()))
                 .build();

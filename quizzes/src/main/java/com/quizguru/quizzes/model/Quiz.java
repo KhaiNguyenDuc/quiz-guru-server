@@ -3,10 +3,7 @@ package com.quizguru.quizzes.model;
 import com.quizguru.quizzes.model.enums.QuizType;
 import com.quizguru.quizzes.model.enums.Level;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.List;
 
@@ -16,7 +13,8 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Quiz {
+@EqualsAndHashCode(callSuper = true)
+public class Quiz extends DateAudit{
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;

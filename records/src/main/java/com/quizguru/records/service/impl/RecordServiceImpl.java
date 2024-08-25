@@ -1,7 +1,8 @@
 package com.quizguru.records.service.impl;
 
-import com.quizguru.records.client.LibraryClient;
-import com.quizguru.records.client.QuizClient;
+import com.quizguru.records.client.library.LibraryClient;
+import com.quizguru.records.client.quiz.QuizClient;
+import com.quizguru.records.client.quiz.dto.response.ProvRecordResponse;
 import com.quizguru.records.dto.request.RecordRequest;
 import com.quizguru.records.dto.response.*;
 import com.quizguru.records.exception.InvalidRequestException;
@@ -15,7 +16,6 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;

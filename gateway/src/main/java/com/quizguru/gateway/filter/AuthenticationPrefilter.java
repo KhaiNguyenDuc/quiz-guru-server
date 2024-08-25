@@ -1,10 +1,7 @@
 package com.quizguru.gateway.filter;
 
-import com.quizguru.gateway.client.AuthClient;
-import com.quizguru.gateway.dto.ApiResponse;
+import com.quizguru.gateway.client.auth.AuthClient;
 import com.quizguru.gateway.dto.TokenValidationResponse;
-import com.quizguru.gateway.exception.TokenValidationException;
-import com.quizguru.gateway.exception.UnauthorizedException;
 import com.quizguru.gateway.helper.JwtHelper;
 import com.quizguru.gateway.utils.CustomHeaders;
 import lombok.extern.slf4j.Slf4j;
@@ -13,12 +10,9 @@ import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
-import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
-import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
 
 import java.util.Optional;

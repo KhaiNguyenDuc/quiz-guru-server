@@ -3,10 +3,7 @@ package com.quizguru.auth.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.quizguru.auth.model.enums.RoleName;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.NaturalId;
 
 import java.util.List;
@@ -15,7 +12,8 @@ import java.util.List;
 @Setter
 @Table(name = "roles")
 @Entity
-public class Role {
+@EqualsAndHashCode(callSuper = true)
+public class Role extends DateAudit{
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;

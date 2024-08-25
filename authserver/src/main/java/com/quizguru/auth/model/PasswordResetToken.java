@@ -10,7 +10,8 @@ import java.time.Instant;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class PasswordResetToken {
+@EqualsAndHashCode(callSuper = true)
+public class PasswordResetToken extends DateAudit {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

@@ -16,7 +16,11 @@ CREATE TABLE quizzes (
     level VARCHAR(50),
     duration INT,
     is_deleted BOOLEAN DEFAULT FALSE,
-    user_id VARCHAR(36)
+    user_id VARCHAR(36),
+    created_at datetime NOT NULL,
+    updated_at datetime NOT NULL,
+    created_by VARCHAR(255) NULL,
+    updated_by VARCHAR(255) NULL
 );
 
 CREATE TABLE questions (
@@ -27,8 +31,11 @@ CREATE TABLE questions (
     quiz_id VARCHAR(36),
     CONSTRAINT fk_quiz
     FOREIGN KEY (quiz_id)
-    REFERENCES quizzes(id)
-    ON DELETE CASCADE
+    REFERENCES quizzes(id) ON DELETE CASCADE,
+    created_at datetime NOT NULL,
+    updated_at datetime NOT NULL,
+    created_by VARCHAR(255) NULL,
+    updated_by VARCHAR(255) NULL
 );
 
 CREATE TABLE choices (
@@ -38,6 +45,9 @@ CREATE TABLE choices (
     question_id VARCHAR(36),
     CONSTRAINT fk_question
     FOREIGN KEY (question_id)
-    REFERENCES questions(id)
-    ON DELETE CASCADE
+    REFERENCES questions(id) ON DELETE CASCADE,
+    created_at datetime NOT NULL,
+    updated_at datetime NOT NULL,
+    created_by VARCHAR(255) NULL,
+    updated_by VARCHAR(255) NULL
 );

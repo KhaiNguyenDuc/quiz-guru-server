@@ -3,17 +3,17 @@ package com.quizguru.libraries.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.util.List;
 
 @Entity
 @Setter
 @Getter
-@Table(name = "library")
+@Table(name = "libraries")
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Library {
+@EqualsAndHashCode(callSuper = true)
+public class Library extends DateAudit{
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
