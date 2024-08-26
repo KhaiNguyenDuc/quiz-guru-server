@@ -31,9 +31,11 @@ public class RecordItem extends DateAudit {
     @Column(name = "explanation")
     private String explanation;
 
-    @ElementCollection
-    @CollectionTable(name = "record_item_choice", joinColumns = @JoinColumn(name = "record_item_id"))
-    @Column(name = "choice_id")
-    private List<String> selectedChoices;
+//    @ElementCollection
+//    @CollectionTable(name = "record_item_choice", joinColumns = @JoinColumn(name = "record_item_id"))
+//    @Column(name = "choice_id")
+//    private List<String> selectedChoices;
 
+    @OneToMany(mappedBy = "recordItem", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private List<RecordItemChoice> selectedChoices;
 }

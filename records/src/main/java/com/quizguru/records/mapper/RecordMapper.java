@@ -9,6 +9,8 @@ import com.quizguru.records.client.quiz.dto.response.RecordItemResponse;
 import com.quizguru.records.dto.response.RecordResponse;
 import com.quizguru.records.model.Record;
 import com.quizguru.records.model.RecordItem;
+import com.quizguru.records.model.RecordItemChoice;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -58,12 +60,20 @@ public class RecordMapper {
                 .quizId(recordRequest.quizId())
                 .build();
         for (RecordItemRequest recordItemRequest : recordItemRequests) {
+            List<RecordItemChoice> recordItemChoices = new ArrayList<>();
+
             RecordItem recordItem = RecordItem.builder()
                     .questionId(recordItemRequest.questionId())
-                    .selectedChoices(recordItemRequest.selectedChoiceIds())
                     .explanation(recordItemRequest.explanation())
                     .record(record)
                     .build();
+            for(String id: recordItemRequest.selectedChoiceIds()){
+                RecordItemChoice recordItemChoice = new RecordItemChoice();
+                recordItemChoice.setChoiceId(id);
+                recordItemChoice.setRecordItem(recordItem);
+                recordItemChoices.add(recordItemChoice);
+            }
+            recordItem.setSelectedChoices(recordItemChoices);
             recordItems.add(recordItem);
         }
         record.setRecordItems(recordItems);
@@ -133,10 +143,14 @@ public class RecordMapper {
 
     private static RecordItemRequest toRecordItemRequest(RecordItem recordItem) {
 
+        List<String> selectedChoiceIds = new ArrayList<>();
+        recordItem.getSelectedChoices().forEach(recordItemChoice -> {
+            selectedChoiceIds.add(recordItemChoice.getChoiceId());
+        });
         return RecordItemRequest.builder()
                 .explanation(recordItem.getExplanation())
                 .questionId(recordItem.getQuestionId())
-                .selectedChoiceIds(recordItem.getSelectedChoices())
+                .selectedChoiceIds(selectedChoiceIds)
                 .build();
     }
 }
