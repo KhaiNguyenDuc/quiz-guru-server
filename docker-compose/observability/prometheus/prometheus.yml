@@ -1,0 +1,41 @@
+global:
+  scrape_interval: 15s # Set the scrape interval to every 15 seconds. Default is every 1 minute.
+  evaluation_interval: 15s # Evaluate rules every 15 seconds. The default is every 1 minute.
+
+scrape_configs:
+  - job_name: "auth-server"
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: [ "auth-server:8086" ]
+  - job_name: "config-server"
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: [ "config-server:8888" ]
+  - job_name: "eureka-server"
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: [ "eureka-server:8761" ]
+  - job_name: "gateway-server"
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: [ "gateway-server:8072" ]
+  - job_name: "generate-server"
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: [ "generate-server:8085" ]
+  - job_name: "library-server"
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: [ "library-server:8084" ]
+  - job_name: "quiz-server"
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: [ "quiz-server:8083" ]
+  - job_name: "record-server"
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: [ "record-server:8082" ]
+  - job_name: "user-server"
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: [ "user-server:8081" ]

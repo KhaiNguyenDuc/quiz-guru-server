@@ -9,6 +9,7 @@ import com.quizguru.auth.service.PasswordResetService;
 import com.quizguru.auth.service.RefreshTokenService;
 import com.quizguru.auth.service.VerificationTokenService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.CurrentSecurityContext;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
+@Slf4j
 public class AuthController {
 
     private final AuthService authService;
@@ -105,8 +107,9 @@ public class AuthController {
     @GetMapping("/internal/users/role")
     public ResponseEntity<ApiResponse> findRoleFromUserId(@RequestParam("userId") String userId){
         String roleName = authService.findRoleFromUserId(userId);
-
+        log.info("start findRoleFromUserId");
         ApiResponse response = new ApiResponse(roleName, "Success");
+        log.info("end findRoleFromUserId");
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

@@ -9,6 +9,7 @@ import com.quizguru.libraries.dto.response.WordResponse;
 import com.quizguru.libraries.dto.response.WordSetResponse;
 import com.quizguru.libraries.service.LibraryService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +22,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/libraries")
 @RequiredArgsConstructor
+@Slf4j
 public class LibraryController {
 
     private final LibraryService libraryService;
@@ -113,7 +115,9 @@ public class LibraryController {
 
     @GetMapping("/internal/word-set")
     public ResponseEntity<ApiResponse<WordSetResponse>> findWordSetByQuizId(@RequestParam("quizId") String quizId){
+        log.debug("Start findWordSetByQuizId");
         WordSetResponse wordSetResponses = libraryService.findWordSetByQuizId(quizId);
+        log.debug("End findWordSetByQuizId");
         return new ResponseEntity<>(new ApiResponse<>(wordSetResponses, "success"), HttpStatus.OK);
     }
 

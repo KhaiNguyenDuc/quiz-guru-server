@@ -10,6 +10,7 @@ import com.quizguru.quizzes.dto.request.vocabulary.TextVocabRequest;
 import com.quizguru.quizzes.dto.response.*;
 import com.quizguru.quizzes.service.QuizService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -22,6 +23,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/quizzes")
 @RequiredArgsConstructor
+@Slf4j
 public class QuizController {
 
     private final QuizService quizService;
@@ -116,7 +118,9 @@ public class QuizController {
 
     @GetMapping("/detail")
     public ResponseEntity<ApiResponse<DetailQuizResponse>> findDetailQuizById(@RequestParam("id") String quizId) {
+        log.debug("Start findDetailQuizById");
         DetailQuizResponse response = quizService.findDetailQuizById(quizId);
+        log.debug("End findDetailQuizById");
         return new ResponseEntity<>(new ApiResponse<>(response, "success"), HttpStatus.OK);
     }
 

@@ -6,16 +6,16 @@ services:
   microservice-base-config:
     extends:
       service: network-base-config
-    deploy:
-      resources:
-        limit:
-          memory: 500M
+    environment:
+      JAVA_TOOL_OPTIONS: "-javaagent:/root/.m2/repository/io/opentelemetry/javaagent/opentelemetry-javaagent/2.8.0/opentelemetry-javaagent-2.8.0.jar"
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://tempo:4317
+      OTEL_METRICS_EXPORTER: none
 
   microservice-configserver-config:
     extends:
       service: microservice-base-config
     environment:
-      SPRING_PROFILES_ACTIVE: default
+      SPRING_PROFILES_ACTIVE: qa
       SPRING_CONFIG_IMPORT: configserver:http://config-server:8888/
 
   microservice-eureka-config:
