@@ -7,9 +7,13 @@ services:
     extends:
       service: network-base-config
     environment:
-      JAVA_TOOL_OPTIONS: "-javaagent:/root/.m2/repository/io/opentelemetry/javaagent/opentelemetry-javaagent/2.8.0/opentelemetry-javaagent-2.8.0.jar"
+      JAVA_TOOL_OPTIONS: "-javaagent:/opentelemetry-javaagent.jar"
       OTEL_EXPORTER_OTLP_ENDPOINT: http://tempo:4317
       OTEL_METRICS_EXPORTER: none
+      OTEL_LOGS_EXPORTER: none
+      OTEL_EXPORTER_OTLP_PROTOCOL: grpc
+    volumes:
+      - ../libs/opentelemetry-javaagent.jar:/opentelemetry-javaagent.jar
 
   microservice-configserver-config:
     extends:

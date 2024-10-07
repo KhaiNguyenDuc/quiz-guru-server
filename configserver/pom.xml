@@ -12,11 +12,10 @@
 	<artifactId>configserver</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>configserver</name>
-
+	<packaging>jar</packaging>
 	<properties>
 		<java.version>17</java.version>
 		<spring-cloud.version>2023.0.2</spring-cloud.version>
-		<otel.version>2.8.0</otel.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -36,11 +35,6 @@
 			<groupId>io.micrometer</groupId>
 			<artifactId>micrometer-registry-prometheus</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>io.opentelemetry.javaagent</groupId>
-			<artifactId>opentelemetry-javaagent</artifactId>
-			<version>${otel.version}</version>
-		</dependency>
 	</dependencies>
 	<dependencyManagement>
 		<dependencies>
@@ -59,6 +53,15 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+					<mainClass>com.quizguru.configserver.ConfigurationApplication</mainClass>
+					<excludes>
+						<exclude>
+							<groupId>org.projectlombok</groupId>
+							<artifactId>lombok</artifactId>
+						</exclude>
+					</excludes>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>

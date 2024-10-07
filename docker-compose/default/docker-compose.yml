@@ -39,7 +39,6 @@ services:
     ports:
       - "5672:5672"
       - "15672:15672"
-
   redis:
     image: redis
     ports:
@@ -276,9 +275,10 @@ services:
         condition: service_healthy
     extends:
       file: common-service.yml
-      service: microservice-configserver-config
+      service: microservice-base-config
     environment:
       OTEL_SERVICE_NAME: "eureka-server"
+      SPRING_CONFIG_IMPORT: configserver:http://config-server:8888/
   gateway-server:
     image: "quizguru/gateway:1.0"
     container_name: gateway-ms

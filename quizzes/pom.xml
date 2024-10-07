@@ -13,11 +13,10 @@
 	<version>0.0.1-SNAPSHOT</version>
 	<name>quizzes</name>
 	<description>Quiz service for quiz application</description>
-
+	<packaging>jar</packaging>
 	<properties>
 		<java.version>17</java.version>
 		<spring-cloud.version>2023.0.2</spring-cloud.version>
-		<otel.version>2.8.0</otel.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -92,12 +91,7 @@
 			<groupId>io.micrometer</groupId>
 			<artifactId>micrometer-registry-prometheus</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>io.opentelemetry.javaagent</groupId>
-			<artifactId>opentelemetry-javaagent</artifactId>
-			<version>${otel.version}</version>
-			<scope>runtime</scope>
-		</dependency>
+
 	</dependencies>
 
 	<dependencyManagement>
@@ -118,6 +112,7 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<configuration>
+					<mainClass>com.quizguru.quizzes.QuizApplication</mainClass>
 					<excludes>
 						<exclude>
 							<groupId>org.projectlombok</groupId>
