@@ -30,29 +30,30 @@ public class AuthenticationPrefilter extends AbstractGatewayFilterFactory<Authen
     @Override
     public GatewayFilter apply(Config config) {
         return (exchange, chain) -> {
-            ServerHttpRequest request = exchange.getRequest();
-            Optional<String> token = JwtHelper.resolveToken(request);
-
-            if (token.isEmpty()) {
-                log.warn("Token not found in request");
-                exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
-                return exchange.getResponse().setComplete();
-            }
-            log.warn("Token found in request");
+//            ServerHttpRequest request = exchange.getRequest();
+            return chain.filter(exchange);
+//            Optional<String> token = JwtHelper.resolveToken(request);
+//
+//            if (token.isEmpty()) {
+//                log.warn("Token not found in request");
+//                exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
+//                return exchange.getResponse().setComplete();
+//            }
+//            log.warn("Token found in request");
 
             // Propagate the exception
-            return authClient.validateToken(token.get())
-                    .flatMap(response -> {
-                        TokenValidationResponse tokenValidationResponse = response.data();
-                        String userId = tokenValidationResponse.userId();
-                        String authorization = String.join(",", tokenValidationResponse.userAuthorities());
-                        exchange.getRequest().mutate()
-                                .header(CustomHeaders.X_USER_ID, userId)
-                                .header(CustomHeaders.X_USER_AUTHORITIES, authorization)
-                                .build();
-                        return chain.filter(exchange);
-                    })
-                    .onErrorResume(WebClientResponseException.class, Mono::error);
+//            return authClient.validateToken(token.get())
+//                    .flatMap(response -> {
+//                        TokenValidationResponse tokenValidationResponse = response.data();
+//                        String userId = tokenValidationResponse.userId();
+//                        String authorization = String.join(",", tokenValidationResponse.userAuthorities());
+//                        exchange.getRequest().mutate()
+//                                .header(CustomHeaders.X_USER_ID, userId)
+//                                .header(CustomHeaders.X_USER_AUTHORITIES, authorization)
+//                                .build();
+//                        return chain.filter(exchange);
+//                    })
+//                    .onErrorResume(WebClientResponseException.class, Mono::error);
         };
     }
 

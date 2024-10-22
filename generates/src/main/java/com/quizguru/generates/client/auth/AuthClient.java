@@ -6,9 +6,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.List;
+
 @FeignClient(name = "AUTH-SERVER")
 public interface AuthClient {
 
     @GetMapping("/auth/internal/users/role")
-    ResponseEntity<ApiResponse<String>> findRoleFromUserId(@RequestParam("userId") String userId);
+    ResponseEntity<ApiResponse<List<String>>> findRoleFromUserId(@RequestParam("userId") String userId);
 }

@@ -133,9 +133,9 @@ import java.util.stream.Collectors;
      public void setSecurityContextFromHeaders(String userId) {
 
         String roles = "";
-        ApiResponse<String> apiResponse = authClient.findRoleFromUserId(userId).getBody();
+        ApiResponse<List<String>> apiResponse = authClient.findRoleFromUserId(userId).getBody();
         if(Objects.nonNull(apiResponse)){
-            roles = apiResponse.data();
+            roles = String.valueOf(apiResponse.data());
         }
         if (userId != null && Objects.nonNull(roles)) {
 

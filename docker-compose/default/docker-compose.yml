@@ -5,9 +5,9 @@ services:
     image: mysql:8.0
     container_name: mysql-db
     environment:
-      MYSQL_ROOT_PASSWORD: k989898k
+      - MYSQL_ROOT_PASSWORD
     ports:
-      - "3306:3306"
+      - "3305:3306"
     volumes:
       - ./init-scripts:/docker-entrypoint-initdb.d # Mount init scripts
     healthcheck:
@@ -18,27 +18,41 @@ services:
     extends:
       file: common-service.yml
       service: network-base-config
-  tempo:
-    image: grafana/tempo:2.4.2
-    container_name: tempo
-    command: -config.file /etc/tempo-config.yml
-    ports:
-      - "3110:3100"
-      - "4317:4317"
-    volumes:
-      - ../observability/tempo/tempo.yml:/etc/tempo-config.yml
-    extends:
-      file: common-service.yml
-      service: network-base-config
   rabbitmq:
     image: rabbitmq:management
     container_name: rabbitmq
     environment:
-      - RABBITMQ_DEFAULT_USER=guest
-      - RABBITMQ_DEFAULT_PASS=guest
+      - RABBITMQ_DEFAULT_USER
+      - RABBITMQ_DEFAULT_PASS
     ports:
       - "5672:5672"
       - "15672:15672"
+    extends:
+      file: common-service.yml
+      service: network-base-config
+  identity:
+    image: quay.io/keycloak/keycloak:23.0.6
+    command:
+      - "start-dev"
+      - "--import-realm"
+    environment:
+      - KEYCLOAK_ADMIN
+      - KEYCLOAK_ADMIN_PASSWORD
+      - KC_DB
+      - KC_DB_USERNAME
+      - KC_DB_PASSWORD
+      - KC_DB_URL
+    ports:
+      - "7080:8080"
+    volumes:
+      - ../../keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json
+      - ../../keycloak/themes/quizguru/theme:/opt/keycloak/themes
+    extends:
+      file: common-service.yml
+      service: network-base-config
+    depends_on:
+      mysql:
+        condition: service_healthy
   redis:
     image: redis
     ports:
@@ -50,412 +64,10 @@ services:
     extends:
       file: common-service.yml
       service: network-base-config
-  read:
-    image: grafana/loki:3.1.0
-    command: "-config.file=/etc/loki/config.yaml -target=read"
-    ports:
-      - 3101:3100
-      - 7946
-      - 9095
-    volumes:
-      - ../observability/loki/loki-config.yaml:/etc/loki/config.yaml
-    depends_on:
-      - minio
-    healthcheck:
-      test: [ "CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3100/ready || exit 1" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks: &loki-dns
-      quizguru:
-        aliases:
-          - loki
-  write:
-    image: grafana/loki:3.1.0
-    command: "-config.file=/etc/loki/config.yaml -target=write"
-    ports:
-      - 3102:3100
-      - 7946
-      - 9095
-    volumes:
-      - ../observability/loki/loki-config.yaml:/etc/loki/config.yaml
-    healthcheck:
-      test: [ "CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3100/ready || exit 1" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    depends_on:
-      - minio
-    networks:
-      <<: *loki-dns
-  alloy:
-    image: grafana/alloy:latest
-    volumes:
-      - ../observability/alloy/alloy-local-config.yaml:/etc/alloy/config.alloy:ro
-      - /var/run/docker.sock:/var/run/docker.sock
-    command:  run --server.http.listen-addr=0.0.0.0:12345 --storage.path=/var/lib/alloy/data /etc/alloy/config.alloy
-    ports:
-      - 12345:12345
-    depends_on:
-      - gateway
-    networks:
-      <<: *loki-dns
-  minio:
-    image: minio/minio
-    entrypoint:
-      - sh
-      - -euc
-      - |
-        mkdir -p /data/loki-data && \
-        mkdir -p /data/loki-ruler && \
-        minio server /data
-    environment:
-      - MINIO_ROOT_USER=loki
-      - MINIO_ROOT_PASSWORD=supersecret
-      - MINIO_PROMETHEUS_AUTH_TYPE=public
-      - MINIO_UPDATE=off
-    ports:
-      - 9000
-    volumes:
-      - ./.data/minio:/data
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
-      interval: 15s
-      timeout: 20s
-      retries: 5
-    networks:
-      <<: *loki-dns
-  grafana:
-    image: grafana/grafana:latest
-    environment:
-      - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
-      - GF_AUTH_ANONYMOUS_ENABLED=true
-      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
-    depends_on:
-      - gateway
-    entrypoint:
-      - sh
-      - -euc
-      - |
-        /run.sh
-    ports:
-      - "3000:3000"
-    volumes:
-      - ../observability/grafana/datasource.yml:/etc/grafana/provisioning/datasources/datasource.yml
-    healthcheck:
-      test: [ "CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3000/api/health || exit 1" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      <<: *loki-dns
-  backend:
-    image: grafana/loki:3.1.0
-    volumes:
-      - ../observability/loki/loki-config.yaml:/etc/loki/config.yaml
-    ports:
-      - "3100"
-      - "7946"
-    command: "-config.file=/etc/loki/config.yaml -target=backend -legacy-read-mode=false"
-    depends_on:
-      - gateway
-    networks:
-      <<: *loki-dns
-  gateway:
-    image: nginx:latest
-    depends_on:
-      - read
-      - write
-    entrypoint:
-      - sh
-      - -euc
-      - |
-        cat <<EOF > /etc/nginx/nginx.conf
-        user  nginx;
-        worker_processes  5;  ## Default: 1
 
-        events {
-          worker_connections   1000;
-        }
-
-        http {
-          resolver 127.0.0.11;
-
-          server {
-            listen             3100;
-
-            location = / {
-              return 200 'OK';
-              auth_basic off;
-            }
-
-            location = /api/prom/push {
-              proxy_pass       http://write:3100\$$request_uri;
-            }
-
-            location = /api/prom/tail {
-              proxy_pass       http://read:3100\$$request_uri;
-              proxy_set_header Upgrade \$$http_upgrade;
-              proxy_set_header Connection "upgrade";
-            }
-
-            location ~ /api/prom/.* {
-              proxy_pass       http://read:3100\$$request_uri;
-            }
-
-            location = /loki/api/v1/push {
-              proxy_pass       http://write:3100\$$request_uri;
-            }
-
-            location = /loki/api/v1/tail {
-              proxy_pass       http://read:3100\$$request_uri;
-              proxy_set_header Upgrade \$$http_upgrade;
-              proxy_set_header Connection "upgrade";
-            }
-
-            location ~ /loki/api/.* {
-              proxy_pass       http://read:3100\$$request_uri;
-            }
-          }
-        }
-        EOF
-        /docker-entrypoint.sh nginx -g "daemon off;"
-    ports:
-      - "3100:3100"
-    healthcheck:
-      test: ["CMD", "service", "nginx", "status"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      <<: *loki-dns
-  prometheus:
-    image: prom/prometheus:v2.45.0
-    container_name: prometheus
-    ports:
-      - "9090:9090"
-    volumes:
-      - ../observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
-    extends:
-      file: common-service.yml
-      service: network-base-config
-  config-server:
-    image: "quizguru/configserver:1.0"
-    container_name: configserver-ms
-    build:
-      context: ../../configserver
-      dockerfile: Dockerfile
-    ports:
-      - "8888:8888"
-    healthcheck:
-      test: "wget -qO- http://localhost:8888/actuator/health/readiness | grep UP || exit 1"
-      interval: 20s
-      timeout: 10s
-      retries: 20
-    extends:
-      file: common-service.yml
-      service: microservice-base-config
-    environment:
-      OTEL_SERVICE_NAME: "configserver"
-  eureka-server:
-    image: "quizguru/eureka:1.0"
-    container_name: eureka-ms
-    build:
-      context: ../../eureka
-      dockerfile: Dockerfile
-    ports:
-      - "8761:8761"
-    healthcheck:
-      test: "wget -qO- http://localhost:8761/actuator/health/readiness | grep UP || exit 1"
-      interval: 20s
-      timeout: 10s
-      retries: 20
-    depends_on:
-      config-server:
-        condition: service_healthy
-    extends:
-      file: common-service.yml
-      service: microservice-base-config
-    environment:
-      OTEL_SERVICE_NAME: "eureka-server"
-      SPRING_CONFIG_IMPORT: configserver:http://config-server:8888/
-  gateway-server:
-    image: "quizguru/gateway:1.0"
-    container_name: gateway-ms
-    build:
-      context: ../../gateway
-      dockerfile: Dockerfile
-    ports:
-      - "8072:8072"
-    healthcheck:
-      test: "wget -qO- http://localhost:8072/actuator/health/readiness | grep UP || exit 1"
-      interval: 20s
-      timeout: 10s
-      retries: 20
-    depends_on:
-      config-server:
-        condition: service_healthy
-      eureka-server:
-        condition: service_healthy
-      mysql:
-        condition: service_healthy
-    extends:
-      file: common-service.yml
-      service: microservice-eureka-config
-    environment:
-      OTEL_SERVICE_NAME: "gateway-server"
-  auth-server:
-    image: "quizguru/auth:1.0"
-    container_name: auth-ms
-    build:
-      context: ../../authserver
-      dockerfile: Dockerfile
-    ports:
-      - "8086:8086"
-    healthcheck:
-      test: "wget -qO- http://localhost:8086/actuator/health/readiness | grep UP || exit 1"
-      interval: 20s
-      timeout: 10s
-      retries: 20
-    depends_on:
-      config-server:
-        condition: service_healthy
-      eureka-server:
-        condition: service_healthy
-      mysql:
-        condition: service_healthy
-    extends:
-      file: common-service.yml
-      service: microservice-eureka-config
-    environment:
-      OTEL_SERVICE_NAME: "auth-server"
-  generate-server:
-    image: "quizguru/generates:1.0"
-    container_name: generate-ms
-    build:
-      context: ../../generates
-      dockerfile: Dockerfile
-    ports:
-      - "8085:8085"
-    healthcheck:
-      test: "wget -qO- http://localhost:8085/actuator/health/readiness | grep UP || exit 1"
-      interval: 20s
-      timeout: 10s
-      retries: 20
-    depends_on:
-      config-server:
-        condition: service_healthy
-      eureka-server:
-        condition: service_healthy
-      mysql:
-        condition: service_healthy
-    extends:
-      file: common-service.yml
-      service: microservice-eureka-config
-    environment:
-      OTEL_SERVICE_NAME: "generate-server"
-  library-server:
-    image: "quizguru/library:1.0"
-    container_name: library-ms
-    build:
-      context: ../../libraries
-      dockerfile: Dockerfile
-    ports:
-      - "8084:8084"
-    healthcheck:
-      test: "wget -qO- http://localhost:8084/actuator/health/readiness | grep UP || exit 1"
-      interval: 20s
-      timeout: 10s
-      retries: 20
-    depends_on:
-      config-server:
-        condition: service_healthy
-      eureka-server:
-        condition: service_healthy
-      mysql:
-        condition: service_healthy
-    extends:
-      file: common-service.yml
-      service: microservice-eureka-config
-    environment:
-      OTEL_SERVICE_NAME: "library-server"
-  quiz-server:
-    image: "quizguru/quiz:1.0"
-    container_name: quiz-ms
-    build:
-      context: ../../quizzes
-      dockerfile: Dockerfile
-    ports:
-      - "8083:8083"
-    healthcheck:
-      test: "wget -qO- http://localhost:8083/actuator/health/readiness | grep UP || exit 1"
-      interval: 20s
-      timeout: 10s
-      retries: 20
-    depends_on:
-      config-server:
-        condition: service_healthy
-      eureka-server:
-        condition: service_healthy
-      mysql:
-        condition: service_healthy
-    extends:
-      file: common-service.yml
-      service: microservice-eureka-config
-    environment:
-      OTEL_SERVICE_NAME: "quiz-server"
-  record-server:
-    image: "quizguru/record:1.0"
-    container_name: record-ms
-    build:
-      context: ../../records
-      dockerfile: Dockerfile
-    ports:
-      - "8082:8082"
-    healthcheck:
-      test: "wget -qO- http://localhost:8082/actuator/health/readiness | grep UP || exit 1"
-      interval: 20s
-      timeout: 10s
-      retries: 20
-    depends_on:
-      config-server:
-        condition: service_healthy
-      eureka-server:
-        condition: service_healthy
-      mysql:
-        condition: service_healthy
-    extends:
-      file: common-service.yml
-      service: microservice-eureka-config
-    environment:
-      OTEL_SERVICE_NAME: "record-server"
-  user-server:
-    image: "quizguru/user:1.0"
-    container_name: user-ms
-    build:
-      context: ../../users
-      dockerfile: Dockerfile
-    ports:
-      - "8081:8081"
-    healthcheck:
-      test: "wget -qO- http://localhost:8081/actuator/health/readiness | grep UP || exit 1"
-      interval: 20s
-      timeout: 10s
-      retries: 20
-    depends_on:
-      config-server:
-        condition: service_healthy
-      eureka-server:
-        condition: service_healthy
-      mysql:
-        condition: service_healthy
-    extends:
-      file: common-service.yml
-      service: microservice-eureka-config
-    environment:
-      OTEL_SERVICE_NAME: "user-server"
 networks:
   quizguru:
     driver: "bridge"
+
 volumes:
   prom_data:
