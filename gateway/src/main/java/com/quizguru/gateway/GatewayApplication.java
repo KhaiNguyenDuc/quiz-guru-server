@@ -37,8 +37,6 @@ public class GatewayApplication {
                                 .rewritePath("/api/v1/(?<segment>.*)", "/$\\{segment}")
                                 .circuitBreaker(config -> config.setName("quizCircuitBreaker")
                                         .setFallbackUri("forward:/contact-support"))
-                                .requestRateLimiter(config -> config.setRateLimiter(redisRateLimiter())
-                                        .setKeyResolver(userKeyResolver()))
                         )
                         .uri("lb://quizzes")
                 )
@@ -61,12 +59,12 @@ public class GatewayApplication {
                         .uri("lb://libraries")
                 )
                 .route(p -> p
-                        .path("/api/v1/auth/**")
+                        .path("/api/v1/customers/**")
                         .filters(f -> f.rewritePath("/api/v1/(?<segment>.*)", "/$\\{segment}")
                                 .requestRateLimiter(config -> config.setRateLimiter(redisRateLimiter())
                                         .setKeyResolver(userKeyResolver()))
                         )
-                        .uri("lb://auth-server")
+                        .uri("lb://customers")
                 )
                 .build();
     }

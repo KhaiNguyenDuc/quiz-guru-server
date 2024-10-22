@@ -6,7 +6,24 @@ services:
   microservice-base-config:
     extends:
       service: network-base-config
-    deploy:
-      resources:
-        limit:
-          memory: 500M
+    environment:
+      - JAVA_TOOL_OPTIONS
+      - OTEL_EXPORTER_OTLP_ENDPOINT
+      - OTEL_METRICS_EXPORTER
+      - OTEL_LOGS_EXPORTER
+      - OTEL_EXPORTER_OTLP_PROTOCOL
+    volumes:
+      - ../libs/opentelemetry-javaagent.jar:/opentelemetry-javaagent.jar
+
+  microservice-configserver-config:
+    extends:
+      service: microservice-base-config
+    environment:
+      - SPRING_PROFILES_ACTIVE:=${profile_prod}
+      - SPRING_CONFIG_IMPORT
+
+  microservice-eureka-config:
+    extends:
+      service: microservice-configserver-config
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE

@@ -5,7 +5,7 @@ services:
     image: mysql:8.0
     container_name: mysql-db
     environment:
-      MYSQL_ROOT_PASSWORD: k989898k
+      - MYSQL_ROOT_PASSWORD
     ports:
       - "3306:3306"
     volumes:
@@ -18,12 +18,24 @@ services:
     extends:
       file: common-service.yml
       service: network-base-config
+  tempo:
+    image: grafana/tempo:2.4.2
+    container_name: tempo
+    command: -config.file /etc/tempo-config.yml
+    ports:
+      - "3110:3100"
+      - "4317:4317"
+    volumes:
+      - ../observability/tempo/tempo.yml:/etc/tempo-config.yml
+    extends:
+      file: common-service.yml
+      service: network-base-config
   rabbitmq:
     image: rabbitmq:management
     container_name: rabbitmq
     environment:
-      - RABBITMQ_DEFAULT_USER=guest
-      - RABBITMQ_DEFAULT_PASS=guest
+      - RABBITMQ_DEFAULT_USER
+      - RABBITMQ_DEFAULT_PASS
     ports:
       - "5672:5672"
       - "15672:15672"
@@ -98,10 +110,10 @@ services:
         mkdir -p /data/loki-ruler && \
         minio server /data
     environment:
-      - MINIO_ROOT_USER=loki
-      - MINIO_ROOT_PASSWORD=supersecret
-      - MINIO_PROMETHEUS_AUTH_TYPE=public
-      - MINIO_UPDATE=off
+      - MINIO_ROOT_USER
+      - MINIO_ROOT_PASSWORD
+      - MINIO_PROMETHEUS_AUTH_TYPE
+      - MINIO_UPDATE
     ports:
       - 9000
     volumes:
@@ -116,9 +128,9 @@ services:
   grafana:
     image: grafana/grafana:latest
     environment:
-      - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
-      - GF_AUTH_ANONYMOUS_ENABLED=true
-      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_PATHS_PROVISIONING
+      - GF_AUTH_ANONYMOUS_ENABLED
+      - GF_AUTH_ANONYMOUS_ORG_ROLE
     depends_on:
       - gateway
     entrypoint:
@@ -237,12 +249,14 @@ services:
       - "8888:8888"
     healthcheck:
       test: "wget -qO- http://localhost:8888/actuator/health/readiness | grep UP || exit 1"
-      interval: 10s
-      timeout: 5s
-      retries: 10
+      interval: 20s
+      timeout: 10s
+      retries: 20
     extends:
       file: common-service.yml
       service: microservice-base-config
+    environment:
+      - OTEL_SERVICE_NAME=${OTEL_CONFIG_SERVICE_NAME}
   eureka-server:
     image: "quizguru/eureka:1.0"
     container_name: eureka-ms
@@ -253,15 +267,18 @@ services:
       - "8761:8761"
     healthcheck:
       test: "wget -qO- http://localhost:8761/actuator/health/readiness | grep UP || exit 1"
-      interval: 10s
-      timeout: 5s
-      retries: 10
+      interval: 20s
+      timeout: 10s
+      retries: 20
     depends_on:
       config-server:
         condition: service_healthy
     extends:
       file: common-service.yml
-      service: microservice-configserver-config
+      service: microservice-base-config
+    environment:
+      - OTEL_SERVICE_NAME=${OTEL_EUREKA_SERVICE_NAME}
+      - SPRING_CONFIG_IMPORT
   gateway-server:
     image: "quizguru/gateway:1.0"
     container_name: gateway-ms
@@ -272,9 +289,9 @@ services:
       - "8072:8072"
     healthcheck:
       test: "wget -qO- http://localhost:8072/actuator/health/readiness | grep UP || exit 1"
-      interval: 10s
-      timeout: 5s
-      retries: 10
+      interval: 20s
+      timeout: 10s
+      retries: 20
     depends_on:
       config-server:
         condition: service_healthy
@@ -285,6 +302,9 @@ services:
     extends:
       file: common-service.yml
       service: microservice-eureka-config
+    environment:
+      - OTEL_SERVICE_NAME=${OTEL_GATEWAY_SERVICE_NAME}
+      - SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK
   auth-server:
     image: "quizguru/auth:1.0"
     container_name: auth-ms
@@ -295,9 +315,9 @@ services:
       - "8086:8086"
     healthcheck:
       test: "wget -qO- http://localhost:8086/actuator/health/readiness | grep UP || exit 1"
-      interval: 10s
-      timeout: 5s
-      retries: 10
+      interval: 20s
+      timeout: 10s
+      retries: 20
     depends_on:
       config-server:
         condition: service_healthy
@@ -308,19 +328,19 @@ services:
     extends:
       file: common-service.yml
       service: microservice-eureka-config
-  generates-server:
+    environment:
+      - OTEL_SERVICE_NAME=${OTEL_AUTH_SERVICE_NAME}
+  generate-server:
     image: "quizguru/generates:1.0"
-    container_name: generates-ms
+    container_name: generate-ms
     build:
       context: ../../generates
       dockerfile: Dockerfile
-    ports:
-      - "8085:8085"
     healthcheck:
       test: "wget -qO- http://localhost:8085/actuator/health/readiness | grep UP || exit 1"
-      interval: 10s
-      timeout: 5s
-      retries: 10
+      interval: 20s
+      timeout: 10s
+      retries: 20
     depends_on:
       config-server:
         condition: service_healthy
@@ -331,19 +351,19 @@ services:
     extends:
       file: common-service.yml
       service: microservice-eureka-config
+    environment:
+      - OTEL_SERVICE_NAME=${OTEL_GENERATE_SERVICE_NAME}
   library-server:
     image: "quizguru/library:1.0"
     container_name: library-ms
     build:
       context: ../../libraries
       dockerfile: Dockerfile
-    ports:
-      - "8084:8084"
     healthcheck:
       test: "wget -qO- http://localhost:8084/actuator/health/readiness | grep UP || exit 1"
-      interval: 10s
-      timeout: 5s
-      retries: 10
+      interval: 20s
+      timeout: 10s
+      retries: 20
     depends_on:
       config-server:
         condition: service_healthy
@@ -354,19 +374,19 @@ services:
     extends:
       file: common-service.yml
       service: microservice-eureka-config
+    environment:
+      - OTEL_SERVICE_NAME=${OTEL_LIBRARY_SERVICE_NAME}
   quiz-server:
     image: "quizguru/quiz:1.0"
     container_name: quiz-ms
     build:
       context: ../../quizzes
       dockerfile: Dockerfile
-    ports:
-      - "8083:8083"
     healthcheck:
       test: "wget -qO- http://localhost:8083/actuator/health/readiness | grep UP || exit 1"
-      interval: 10s
-      timeout: 5s
-      retries: 10
+      interval: 20s
+      timeout: 10s
+      retries: 20
     depends_on:
       config-server:
         condition: service_healthy
@@ -377,19 +397,19 @@ services:
     extends:
       file: common-service.yml
       service: microservice-eureka-config
+    environment:
+      - OTEL_SERVICE_NAME=${OTEL_QUIZ_SERVICE_NAME}
   record-server:
     image: "quizguru/record:1.0"
     container_name: record-ms
     build:
       context: ../../records
       dockerfile: Dockerfile
-    ports:
-      - "8082:8082"
     healthcheck:
       test: "wget -qO- http://localhost:8082/actuator/health/readiness | grep UP || exit 1"
-      interval: 10s
-      timeout: 5s
-      retries: 10
+      interval: 20s
+      timeout: 10s
+      retries: 20
     depends_on:
       config-server:
         condition: service_healthy
@@ -400,19 +420,19 @@ services:
     extends:
       file: common-service.yml
       service: microservice-eureka-config
+    environment:
+      - OTEL_SERVICE_NAME=${OTEL_RECORD_SERVICE_NAME}
   user-server:
     image: "quizguru/user:1.0"
     container_name: user-ms
     build:
       context: ../../users
       dockerfile: Dockerfile
-    ports:
-      - "8081:8081"
     healthcheck:
       test: "wget -qO- http://localhost:8081/actuator/health/readiness | grep UP || exit 1"
-      interval: 10s
-      timeout: 5s
-      retries: 10
+      interval: 20s
+      timeout: 10s
+      retries: 20
     depends_on:
       config-server:
         condition: service_healthy
@@ -423,6 +443,8 @@ services:
     extends:
       file: common-service.yml
       service: microservice-eureka-config
+    environment:
+      - OTEL_SERVICE_NAME=${OTEL_USER_SERVICE_NAME}
 networks:
   quizguru:
     driver: "bridge"

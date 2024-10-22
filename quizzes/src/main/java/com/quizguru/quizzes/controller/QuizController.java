@@ -28,6 +28,16 @@ public class QuizController {
 
     private final QuizService quizService;
 
+    @GetMapping("/test")
+    public ResponseEntity<ApiResponse<String>> getText() {
+        return new ResponseEntity<>(new ApiResponse<>("Text string", "success"), HttpStatus.OK);
+    }
+
+    @PostMapping("/test")
+    public ResponseEntity<ApiResponse<String>> getText(@RequestBody String text) {
+        return new ResponseEntity<>(new ApiResponse<>(text, "success"), HttpStatus.OK);
+    }
+
     @PostMapping("/text")
     public ResponseEntity<ApiResponse<GenerateQuizResponse>> createQuizByText(
             @RequestBody BaseRequest baseRequest
