@@ -1,5 +1,6 @@
 package com.quizguru.libraries.service.impl;
 
+import com.quizguru.libraries.dto.request.BindRequest;
 import com.quizguru.libraries.dto.request.WordRequest;
 import com.quizguru.libraries.dto.request.WordSetRequest;
 import com.quizguru.libraries.dto.response.PageResponse;
@@ -48,11 +49,15 @@ public class LibraryServiceImpl implements LibraryService {
     
     @Override
     public String createWordSet(WordSetRequest wordSetRequest) {
-        String userId = SecurityContextHolder.getContext().getAuthentication().getName();
-
+        String userId = wordSetRequest.userId();
+        if(userId == null || userId.isEmpty()){
+            userId = SecurityContextHolder.getContext().getAuthentication().getName();
+        }
+        String libraryId = "";
         Optional<Library> libraryOpt = libraryRepository.findByUserId(userId);
         if(libraryOpt.isEmpty()){
-            throw new ResourceNotFoundException(Constant.ERROR_CODE.RESOURCE_NOT_FOUND, "library", "user", userId);
+            libraryId = this.create(userId);
+            libraryOpt = libraryRepository.findById(libraryId);
         }
         if(Objects.isNull(wordSetRequest.words())){
             throw new InvalidRequestException(Constant.ERROR_CODE.INVALID_REQUEST_MSG);
@@ -177,10 +182,11 @@ public class LibraryServiceImpl implements LibraryService {
     }
 
     @Override
-    public void bindQuiz(String wordSetId, String quizId) {
+    public void bindQuiz(BindRequest bindRequest) {
 
-        String userId = SecurityContextHolder.getContext().getAuthentication().getName();
-
+        String userId = bindRequest.userId();
+        String wordSetId = bindRequest.wordSetId();
+        String quizId = bindRequest.quizId();
         Optional<WordSet> wordSetOpt = wordSetRepository.findById(wordSetId);
 
         if(wordSetOpt.isEmpty()){
@@ -234,8 +240,14 @@ public class LibraryServiceImpl implements LibraryService {
 
     @Override
     public PageResponse<List<WordSetResponse>> findCurrentUserWordSets(String userId, Pageable pageable) {
-        Library library = libraryRepository.findByUserId(userId)
-                .orElseThrow(() -> new ResourceNotFoundException(Constant.ERROR_CODE.RESOURCE_NOT_FOUND, "library", "library", userId));
+        Optional<Library> libraryOpt = libraryRepository.findByUserId(userId);
+        String libraryId;
+        if(libraryOpt.isEmpty()){
+            libraryId = this.create(userId);
+            libraryOpt = libraryRepository.findById(libraryId);
+        }
+        Library library = libraryOpt.get();
+        library.setUserId(userId);
         Page<WordSet> wordSet = wordSetRepository.findAllByLibrary(library, pageable);
         List<WordSetResponse> wordSetResponses = WordSetMapper.toWordSetResponses(wordSet.getContent());
 
@@ -251,14 +263,14 @@ public class LibraryServiceImpl implements LibraryService {
     @Override
     public WordSetResponse findWordSetByQuizId(String quizId) {
         WordSet wordSet = wordSetRepository.findByQuizId(quizId)
-                .orElseThrow(() -> new ResourceNotFoundException(Constant.ERROR_CODE.RESOURCE_NOT_FOUND, "wordSet", "wordSet", quizId));
+                .orElseThrow(() -> new ResourceNotFoundException(Constant.ERROR_CODE.RESOURCE_NOT_FOUND, "wordSet", "quiz", quizId));
         return WordSetMapper.toWordSetResponse(wordSet);
     }
 
     @Override
     public void removeQuizByQuizId(String quizId) {
         WordSet wordSet = wordSetRepository.findByQuizId(quizId)
-                .orElseThrow(() -> new ResourceNotFoundException(Constant.ERROR_CODE.RESOURCE_NOT_FOUND,  "wordSet", "wordSet", quizId));
+                .orElseThrow(() -> new ResourceNotFoundException(Constant.ERROR_CODE.RESOURCE_NOT_FOUND,  "wordSet", "quiz", quizId));
         wordSet.setQuizId("");
         wordSetRepository.save(wordSet);
     }

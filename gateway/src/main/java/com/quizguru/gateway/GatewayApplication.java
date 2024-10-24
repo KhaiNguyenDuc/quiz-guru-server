@@ -1,7 +1,5 @@
 package com.quizguru.gateway;
 
-import com.quizguru.gateway.filter.AuthenticationPrefilter;
-import com.quizguru.gateway.utils.CustomHeaders;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.gateway.filter.ratelimit.KeyResolver;
@@ -9,12 +7,10 @@ import org.springframework.cloud.gateway.filter.ratelimit.RedisRateLimiter;
 import org.springframework.cloud.gateway.route.RouteLocator;
 import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
 import org.springframework.context.annotation.Bean;
-import org.springframework.http.HttpMethod;
+import org.springframework.security.core.context.ReactiveSecurityContextHolder;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
-
-import java.time.Duration;
-import java.util.Objects;
 
 @SpringBootApplication
 public class GatewayApplication {
@@ -25,25 +21,23 @@ public class GatewayApplication {
 
     @Bean
     public RouteLocator customRouteLocator(
-            RouteLocatorBuilder builder,
-            AuthenticationPrefilter authenticationPrefilter) {
+            RouteLocatorBuilder builder) {
         return builder.routes()
                 .route(p -> p
                         .path("/api/v1/quizzes/**")
                         .filters(f -> f
-                                .filter(authenticationPrefilter.apply(new AuthenticationPrefilter.Config()))
                                 .requestRateLimiter(config -> config.setRateLimiter(redisRateLimiter())
                                         .setKeyResolver(userKeyResolver()))
                                 .rewritePath("/api/v1/(?<segment>.*)", "/$\\{segment}")
                                 .circuitBreaker(config -> config.setName("quizCircuitBreaker")
                                         .setFallbackUri("forward:/contact-support"))
+
                         )
                         .uri("lb://quizzes")
                 )
                 .route(p -> p
                         .path("/api/v1/records/**")
                         .filters(f -> f
-                                .filter(authenticationPrefilter.apply(new AuthenticationPrefilter.Config()))
                                 .requestRateLimiter(config -> config.setRateLimiter(redisRateLimiter())
                                         .setKeyResolver(userKeyResolver()))
                                 .rewritePath("/api/v1/(?<segment>.*)", "/$\\{segment}"))
@@ -52,7 +46,6 @@ public class GatewayApplication {
                 .route(p -> p
                         .path("/api/v1/libraries/**")
                         .filters(f -> f
-                                .filter(authenticationPrefilter.apply(new AuthenticationPrefilter.Config()))
                                 .requestRateLimiter(config -> config.setRateLimiter(redisRateLimiter())
                                         .setKeyResolver(userKeyResolver()))
                                 .rewritePath("/api/v1/(?<segment>.*)", "/$\\{segment}"))
@@ -70,21 +63,23 @@ public class GatewayApplication {
     }
 
     /***
-     * Every second, specific user can only request once
+     * Every second, specific user can only request twice
      * Ref: <a href="https://docs.spring.io/spring-cloud-gateway/reference/spring-cloud-gateway/gatewayfilter-factories/requestratelimiter-factory.html">...</a>
      * @return RedisRateLimiter
      */
     @Bean
     RedisRateLimiter redisRateLimiter(){
-        return new RedisRateLimiter(1,1,1);
+        return new RedisRateLimiter(2,10,1);
     }
 
     @Bean
     KeyResolver userKeyResolver() {
-        return exchange -> Mono.justOrEmpty(exchange.getRequest().getHeaders().getFirst(CustomHeaders.X_USER_ID))
+        return exchange -> ReactiveSecurityContextHolder.getContext()
+                .map(securityContext -> securityContext.getAuthentication().getName())
                 .switchIfEmpty(Mono.justOrEmpty(getClientIp(exchange)))
                 .defaultIfEmpty("anonymous");
     }
+
 
     private String getClientIp(ServerWebExchange exchange) {
         return exchange.getRequest().getHeaders().getFirst("X-Forwarded-For");

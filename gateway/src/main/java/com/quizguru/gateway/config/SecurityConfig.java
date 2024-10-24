@@ -12,7 +12,13 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.ReactiveJwtAuthenticationConverterAdapter;
 import org.springframework.security.web.server.SecurityWebFilterChain;
+import org.springframework.web.cors.reactive.CorsConfigurationSource;
+import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
+import org.springframework.web.cors.CorsConfiguration;
 import reactor.core.publisher.Mono;
+
+import java.util.Arrays;
+import java.util.List;
 
 @EnableWebFluxSecurity
 @Configuration
@@ -37,4 +43,17 @@ public class SecurityConfig {
         jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(new KeycloakRoleConverter());
         return new ReactiveJwtAuthenticationConverterAdapter(jwtAuthenticationConverter);
     }
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(List.of("http://localhost:3000")); // React app URL
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
+        configuration.setAllowCredentials(true); // Allow cookies or sessions if needed
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration); // Apply CORS to all routes
+        return source;
+    }
+
 }

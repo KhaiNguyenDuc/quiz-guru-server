@@ -762,7 +762,7 @@
       "protocol": "openid-connect",
       "attributes": {
         "oidc.ciba.grant.enabled": "false",
-        "client.secret.creation.time": "1729433771",
+        "client.secret.creation.time": "1729602495",
         "backchannel.logout.session.required": "true",
         "post.logout.redirect.uris": "+",
         "display.on.consent.screen": "false",
@@ -817,7 +817,7 @@
       "protocol": "openid-connect",
       "attributes": {
         "oidc.ciba.grant.enabled": "false",
-        "client.secret.creation.time": "1729433914",
+        "client.secret.creation.time": "1729602605",
         "backchannel.logout.session.required": "true",
         "post.logout.redirect.uris": "+",
         "display.on.consent.screen": "false",
@@ -1658,14 +1658,14 @@
         "subComponents": {},
         "config": {
           "allowed-protocol-mapper-types": [
-            "oidc-address-mapper",
-            "saml-role-list-mapper",
-            "oidc-sha256-pairwise-sub-mapper",
-            "saml-user-attribute-mapper",
             "saml-user-property-mapper",
             "oidc-full-name-mapper",
             "oidc-usermodel-property-mapper",
-            "oidc-usermodel-attribute-mapper"
+            "oidc-sha256-pairwise-sub-mapper",
+            "oidc-address-mapper",
+            "saml-user-attribute-mapper",
+            "oidc-usermodel-attribute-mapper",
+            "saml-role-list-mapper"
           ]
         }
       },
@@ -1689,14 +1689,14 @@
         "subComponents": {},
         "config": {
           "allowed-protocol-mapper-types": [
-            "oidc-address-mapper",
-            "saml-user-attribute-mapper",
-            "saml-user-property-mapper",
-            "saml-role-list-mapper",
-            "oidc-usermodel-attribute-mapper",
             "oidc-sha256-pairwise-sub-mapper",
+            "saml-role-list-mapper",
+            "oidc-usermodel-property-mapper",
+            "oidc-usermodel-attribute-mapper",
+            "saml-user-attribute-mapper",
             "oidc-full-name-mapper",
-            "oidc-usermodel-property-mapper"
+            "saml-user-property-mapper",
+            "oidc-address-mapper"
           ]
         }
       },

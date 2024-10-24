@@ -1,7 +1,7 @@
 package com.quizguru.quizzes.client.library;
 
 import com.quizguru.quizzes.dto.response.ApiResponse;
-import com.quizguru.quizzes.client.library.dto.response.WordSetResponse;
+import com.quizguru.quizzes.dto.response.WordSetResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;

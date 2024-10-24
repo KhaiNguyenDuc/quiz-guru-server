@@ -1,7 +1,7 @@
 package com.quizguru.quizzes.service.impl;
 
 import com.quizguru.quizzes.client.library.LibraryClient;
-import com.quizguru.quizzes.client.library.dto.response.WordSetResponse;
+import com.quizguru.quizzes.dto.response.WordSetResponse;
 import com.quizguru.quizzes.dto.request.QuizGenerateResult;
 import com.quizguru.quizzes.dto.request.QuizRequest;
 import com.quizguru.quizzes.dto.request.RecordItemRequest;

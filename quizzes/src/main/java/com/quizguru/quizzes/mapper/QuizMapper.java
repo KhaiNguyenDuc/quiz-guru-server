@@ -1,6 +1,6 @@
 package com.quizguru.quizzes.mapper;
 
-import com.quizguru.quizzes.client.library.dto.response.WordSetResponse;
+import com.quizguru.quizzes.dto.response.WordSetResponse;
 import com.quizguru.quizzes.dto.request.QuestionRequest;
 import com.quizguru.quizzes.dto.request.text.BaseRequest;
 import com.quizguru.quizzes.dto.request.text.HandledFileRequest;
@@ -63,7 +63,7 @@ public class QuizMapper {
                 .level(Level.valueOf(listVocabRequest.level()))
                 .type(QuizType.valueOf(listVocabRequest.type()))
                 .language(listVocabRequest.language())
-                .givenText(listVocabRequest.names().toString())
+                .givenText("")
                 .isDeleted(false)
                 .build();
     }

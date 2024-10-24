@@ -14,6 +14,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.CurrentSecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
@@ -92,7 +93,7 @@ public class LibraryController {
     public ResponseEntity<ApiResponse<String>> bindQuiz(
             @RequestBody BindRequest bindRequest
     ){
-        libraryService.bindQuiz(bindRequest.wordSetId(), bindRequest.quizId());
+        libraryService.bindQuiz(bindRequest);
         return new ResponseEntity<>(new ApiResponse<>("success", "success"), HttpStatus.CREATED);
     }
 
@@ -106,10 +107,10 @@ public class LibraryController {
 
     @GetMapping("/word-set/current")
     public ResponseEntity<PageResponse<List<WordSetResponse>>> findCurrentUserWordSets(
-            @CurrentSecurityContext(expression = "authentication.principal") UserDetails userDetails,
             @RequestParam(name = "page", defaultValue ="0", required = false) Integer page,
             @RequestParam(name = "size", defaultValue = "10", required = false) Integer size) {
-        PageResponse<List<WordSetResponse>> wordSetResponses = libraryService.findCurrentUserWordSets(userDetails.getUsername(), PageRequest.of(page, size));
+        String id = SecurityContextHolder.getContext().getAuthentication().getName();
+        PageResponse<List<WordSetResponse>> wordSetResponses = libraryService.findCurrentUserWordSets(id, PageRequest.of(page, size));
         return new ResponseEntity<>(wordSetResponses, HttpStatus.OK);
     }
 
