@@ -32,7 +32,7 @@ public class RecordServiceImpl implements RecordService {
     private final LibraryClient libraryClient;
 
     @Override
-    @Transactional
+
     public RecordResponse createRecord(RecordRequest recordRequest) {
         String userId = SecurityContextHolder.getContext().getAuthentication().getName();
         try {
@@ -42,6 +42,7 @@ public class RecordServiceImpl implements RecordService {
             if(Objects.nonNull(apiResponse)){
                 ProvRecordResponse provRecordResponse = apiResponse.data();
                 Record record = RecordMapper.toRecord(recordRequest, userId, provRecordResponse);
+                // TODO: record not saved
                 Record recordSaved = recordRepository.save(record);
                 return RecordMapper.toRecordResponseWithProvData(recordSaved, provRecordResponse);
             }

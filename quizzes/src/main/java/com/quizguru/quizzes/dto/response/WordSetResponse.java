@@ -1,4 +1,4 @@
-package com.quizguru.quizzes.client.library.dto.response;
+package com.quizguru.quizzes.dto.response;
 
 import lombok.Builder;
 

@@ -1,5 +1,6 @@
 package com.quizguru.libraries.service;
 
+import com.quizguru.libraries.dto.request.BindRequest;
 import com.quizguru.libraries.dto.request.WordRequest;
 import com.quizguru.libraries.dto.request.WordSetRequest;
 import com.quizguru.libraries.dto.response.PageResponse;
@@ -18,7 +19,7 @@ public interface LibraryService {
 
     void deleteById(String wordSetId);
 
-    void bindQuiz(String wordSetId, String quizId);
+    void bindQuiz(BindRequest bindRequest);
 
     List<WordResponse> addDefinition(String wordSetId, List<String> words);
 

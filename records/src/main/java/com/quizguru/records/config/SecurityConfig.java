@@ -1,7 +1,6 @@
 package com.quizguru.records.config;
 
-import com.quizguru.records.filter.AuthenticationFilter;
-import lombok.RequiredArgsConstructor;
+import com.quizguru.records.utils.KeycloakRoleConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -10,24 +9,12 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-@Configuration
 @EnableWebSecurity
-@RequiredArgsConstructor
+@Configuration
 public class SecurityConfig {
-
-
-    private final String[] ALLOW_URL = {
-            "/**",
-    };
-
-
-    @Bean
-    AuthenticationFilter authenticationFilter() {
-        return new AuthenticationFilter();
-    }
 
     @Bean
     AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
@@ -37,14 +24,21 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.
-                 csrf(AbstractHttpConfigurer::disable)
+                csrf(AbstractHttpConfigurer::disable)
                 .cors(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .addFilterBefore(authenticationFilter(), UsernamePasswordAuthenticationFilter.class)
+                .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(grantedAuthoritiesExtractor())))
                 .authorizeHttpRequests(requests -> requests
-//                                .requestMatchers(ALLOW_URL).permitAll()
-                                .anyRequest().permitAll()
+                        .requestMatchers("/api/v1/records/**").hasRole("USER")
+                        .anyRequest().permitAll()
                 );
         return http.build();
+    }
+
+    @Bean
+    JwtAuthenticationConverter grantedAuthoritiesExtractor(){
+        JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
+        jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(new KeycloakRoleConverter());
+        return jwtAuthenticationConverter;
     }
 }

@@ -9,8 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.CurrentSecurityContext;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,11 +23,11 @@ public class RecordController {
 
     @GetMapping("/users/current")
     public ResponseEntity<PageResponse<List<RecordResponse>>> findCurrentUserRecord(
-            @CurrentSecurityContext(expression = "authentication.principal") UserDetails userDetails,
             @RequestParam(name = "page", defaultValue ="0", required = false) Integer page,
             @RequestParam(name = "size", defaultValue = "10", required = false) Integer size
     ){
-        PageResponse<List<RecordResponse>> records = recordService.findAllById(userDetails.getUsername(), PageRequest.of(page, size));
+        String id = SecurityContextHolder.getContext().getAuthentication().getName();
+        PageResponse<List<RecordResponse>> records = recordService.findAllById(id, PageRequest.of(page, size));
         return new ResponseEntity<>(records, HttpStatus.OK);
     }
 

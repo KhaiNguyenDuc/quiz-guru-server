@@ -16,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.CurrentSecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -112,11 +113,11 @@ public class QuizController {
 
     @GetMapping(value = "/users/current")
     public ResponseEntity<PageResponse<List<QuizResponse>>> findAllQuizByCurrentUser(
-           @CurrentSecurityContext(expression = "authentication.principal") UserDetails userDetails,
             @RequestParam(name = "page", defaultValue ="0", required = false) Integer page,
             @RequestParam(name = "size", defaultValue = "10", required = false) Integer size
     ){
-        PageResponse<List<QuizResponse>> response = quizService.findAllQuizByUserId(userDetails.getUsername(), PageRequest.of(page, size));
+        String id = SecurityContextHolder.getContext().getAuthentication().getName();
+        PageResponse<List<QuizResponse>> response = quizService.findAllQuizByUserId(id, PageRequest.of(page, size));
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 

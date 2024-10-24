@@ -1,6 +1,9 @@
 package com.quizguru.libraries.dto.request;
 
+import lombok.Builder;
+
 import java.util.List;
 
-public record WordSetRequest(String id, String name, String quizId, List<WordRequest> words) {
+@Builder
+public record WordSetRequest(String id, String name, String quizId, List<WordRequest> words, String userId) {
 }

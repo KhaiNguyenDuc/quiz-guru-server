@@ -2,7 +2,7 @@ package com.quizguru.generates.service.impl;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.quizguru.generates.client.auth.AuthClient;
+import com.quizguru.generates.client.customer.CustomerClient;
 import com.quizguru.generates.client.library.LibraryClient;
 import com.quizguru.generates.client.library.dto.request.BindRequest;
 import com.quizguru.generates.client.library.dto.request.WordRequest;
@@ -39,12 +39,12 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-        public class GenerateServiceImpl implements GenerateService {
+    public class GenerateServiceImpl implements GenerateService {
 
     private final RestTemplate restTemplate;
     private final QuizClient quizClient;
     private final LibraryClient libraryClient;
-    private final AuthClient authClient;
+    private final CustomerClient customerClient;
     private final ObjectMapper objectMapper;
 
     @Override
@@ -85,6 +85,7 @@ import java.util.stream.Collectors;
     public void generateWordSet(ChatRequest chat, ChatResponse chatResponse) {
         if (chat.getPromptRequest() instanceof VocabularyPromptRequest vocabularyPromptRequest){
             try{
+                String userId = SecurityContextHolder.getContext().getAuthentication().getName();
                 String stringResponse = chatResponse.getChoices().get(0).getMessage().getContent();
                 JsonNode jsonNode = objectMapper.readTree(stringResponse);
                 JsonNode wordNode = jsonNode.get("words");
@@ -102,6 +103,7 @@ import java.util.stream.Collectors;
                             .name(vocabularyPromptRequest.wordSetName)
                             .words(wordRequests)
                             .quizId(vocabularyPromptRequest.quizId)
+                            .userId(userId)
                             .build();
                     libraryClient.createWordSet(wordSetRequest);
                 }else {
@@ -115,6 +117,7 @@ import java.util.stream.Collectors;
                     BindRequest bindRequest = BindRequest.builder()
                             .wordSetId(vocabularyPromptRequest.wordSetId)
                             .quizId(vocabularyPromptRequest.quizId)
+                            .userId(userId)
                             .build();
                     libraryClient.bindQuiz(bindRequest);
                 }
@@ -133,7 +136,7 @@ import java.util.stream.Collectors;
      public void setSecurityContextFromHeaders(String userId) {
 
         String roles = "";
-        ApiResponse<List<String>> apiResponse = authClient.findRoleFromUserId(userId).getBody();
+        ApiResponse<List<String>> apiResponse = customerClient.findRoleFromUserId(userId).getBody();
         if(Objects.nonNull(apiResponse)){
             roles = String.valueOf(apiResponse.data());
         }

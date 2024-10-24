@@ -9,4 +9,4 @@ keycloak:
   realm: Quizguru
   resource: quizguru-cc
   credentials:
-    secret: XyOTNVgckxaT7jksPLpPUDqlVU9h2so0
+    secret: e6VTsfrMxuMcqEcrfsBLgC76VPkmRjBs

@@ -36,9 +36,5 @@ CREATE TABLE record_item_choice (
     record_item_id VARCHAR(36),
     choice_id VARCHAR(36),
     PRIMARY KEY (record_item_id, choice_id),
-    FOREIGN KEY (record_item_id) REFERENCES record_item(id) ON DELETE CASCADE,
-    created_at datetime NOT NULL,
-    updated_at datetime NOT NULL,
-    created_by VARCHAR(255) NULL,
-    updated_by VARCHAR(255) NULL
+    FOREIGN KEY (record_item_id) REFERENCES record_item(id) ON DELETE CASCADE
 );

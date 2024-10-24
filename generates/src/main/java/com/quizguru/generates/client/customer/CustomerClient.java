@@ -1,4 +1,4 @@
-package com.quizguru.generates.client.auth;
+package com.quizguru.generates.client.customer;
 
 import com.quizguru.generates.dto.response.ApiResponse;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -8,9 +8,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
-@FeignClient(name = "AUTH-SERVER")
-public interface AuthClient {
+@FeignClient(name = "CUSTOMERS")
+public interface CustomerClient {
 
-    @GetMapping("/auth/internal/users/role")
+    @GetMapping("/customers/internal/users/role")
     ResponseEntity<ApiResponse<List<String>>> findRoleFromUserId(@RequestParam("userId") String userId);
 }
