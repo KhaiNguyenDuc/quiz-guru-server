@@ -3,12 +3,16 @@ package com.quizguru.records.service.impl;
 import com.quizguru.records.client.library.LibraryClient;
 import com.quizguru.records.client.quiz.QuizClient;
 import com.quizguru.records.client.quiz.dto.response.ProvRecordResponse;
+import com.quizguru.records.dto.request.RecordItemRequest;
 import com.quizguru.records.dto.request.RecordRequest;
+import com.quizguru.records.dto.request.UpdateRecordRequest;
 import com.quizguru.records.dto.response.*;
 import com.quizguru.records.exception.InvalidRequestException;
 import com.quizguru.records.exception.ResourceNotFoundException;
+import com.quizguru.records.mapper.RecordItemMapper;
 import com.quizguru.records.mapper.RecordMapper;
 import com.quizguru.records.model.Record;
+import com.quizguru.records.model.RecordItem;
 import com.quizguru.records.repository.RecordRepository;
 import com.quizguru.records.service.RecordService;
 import com.quizguru.records.utils.Constant;
@@ -33,8 +37,7 @@ public class RecordServiceImpl implements RecordService {
 
     @Override
 
-    public RecordResponse createRecord(RecordRequest recordRequest) {
-        String userId = SecurityContextHolder.getContext().getAuthentication().getName();
+    public RecordResponse createRecord(RecordRequest recordRequest, String userId) {
         try {
             ApiResponse<ProvRecordResponse> apiResponse = quizClient.findProvisionDataForRecordById(recordRequest.quizId(), recordRequest).getBody();
             libraryClient.increaseReviewTime(recordRequest.quizId());
@@ -75,16 +78,27 @@ public class RecordServiceImpl implements RecordService {
 
     @Override
     public PageResponse<List<RecordResponse>> findAllById(String userId, Pageable pageable) {
+        Page<Record> records = recordRepository.findByUserId(userId, pageable);
+        List<RecordResponse> recordResponses = RecordMapper.toRecordResponses(records.getContent());
 
-            Page<Record> records = recordRepository.findByUserId(userId, pageable);
-            List<RecordResponse> recordResponses = RecordMapper.toRecordResponses(records.getContent());
+        return new PageResponse<>(
+                recordResponses,
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                records.getTotalPages(),
+                records.getNumberOfElements()
+        );
+    }
 
-            return new PageResponse<>(
-                    recordResponses,
-                    pageable.getPageNumber(),
-                    pageable.getPageSize(),
-                    records.getTotalPages(),
-                    records.getNumberOfElements()
-            );
+    @Override
+    public void updateRecord(UpdateRecordRequest updateRecordRequest) {
+        Record record = recordRepository.findById(updateRecordRequest.recordId())
+                .orElseThrow(() -> new ResourceNotFoundException(Constant.ERROR_CODE.RESOURCE_NOT_FOUND, "record", updateRecordRequest.recordId()));
+        List<RecordItem> recordItems = record.getRecordItems();
+        List<RecordItem> recordItemNew = RecordItemMapper.toRecordItem(record, updateRecordRequest.recordItems());
+        recordItems.addAll(recordItemNew);
+        record.setRecordItems(recordItems);
+        record.setTimeLeft(updateRecordRequest.timeLeft());
+        recordRepository.save(record);
     }
 }

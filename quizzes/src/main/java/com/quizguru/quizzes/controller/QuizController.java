@@ -1,6 +1,7 @@
 package com.quizguru.quizzes.controller;
 
 import com.quizguru.quizzes.dto.request.QuizGenerateResult;
+import com.quizguru.quizzes.dto.request.RecordItemRequest;
 import com.quizguru.quizzes.dto.request.RecordRequest;
 import com.quizguru.quizzes.dto.request.text.RawFileRequest;
 import com.quizguru.quizzes.dto.request.vocabulary.ListToVocabRequest;
@@ -15,6 +16,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.security.core.annotation.CurrentSecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -29,14 +33,13 @@ public class QuizController {
 
     private final QuizService quizService;
 
-    @GetMapping("/test")
-    public ResponseEntity<ApiResponse<String>> getText() {
-        return new ResponseEntity<>(new ApiResponse<>("Text string", "success"), HttpStatus.OK);
-    }
-
-    @PostMapping("/test")
-    public ResponseEntity<ApiResponse<String>> getText(@RequestBody String text) {
-        return new ResponseEntity<>(new ApiResponse<>(text, "success"), HttpStatus.OK);
+    @MessageMapping("/submit")
+    @SendTo("/topic/submit")
+    public ResponseEntity<ApiResponse<RecordRequest>> submitRecord(
+            @Payload RecordRequest recordRequest
+    ){
+        quizService.submitRecord(recordRequest);
+        return new ResponseEntity<>(new ApiResponse<>(recordRequest, "success"), HttpStatus.OK);
     }
 
     @PostMapping("/text")

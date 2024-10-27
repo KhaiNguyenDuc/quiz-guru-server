@@ -16,7 +16,6 @@ import org.springframework.web.cors.reactive.CorsConfigurationSource;
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 import org.springframework.web.cors.CorsConfiguration;
 import reactor.core.publisher.Mono;
-
 import java.util.Arrays;
 import java.util.List;
 
@@ -32,6 +31,7 @@ public class SecurityConfig {
                 .pathMatchers("/api/v1/libraries/**").hasRole("USER")
                 .pathMatchers("/api/v1/customers/profile/**").hasRole("USER")
                 .pathMatchers("/api/v1/customers/**").permitAll()
+                .anyExchange().permitAll()
         ).oauth2ResourceServer(oAuth2ResourceServerSpec -> oAuth2ResourceServerSpec
                 .jwt(jwt -> jwt.jwtAuthenticationConverter(grantedAuthoritiesExtractor())));
         http.csrf(ServerHttpSecurity.CsrfSpec::disable);
@@ -46,13 +46,13 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:3000")); // React app URL
+        configuration.setAllowedOrigins(List.of("http://localhost:3000"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
-        configuration.setAllowCredentials(true); // Allow cookies or sessions if needed
+        configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration); // Apply CORS to all routes
+        source.registerCorsConfiguration("/**", configuration);
         return source;
     }
 

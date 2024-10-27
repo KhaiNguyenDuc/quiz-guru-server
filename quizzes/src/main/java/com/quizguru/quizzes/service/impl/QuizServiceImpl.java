@@ -1,11 +1,9 @@
 package com.quizguru.quizzes.service.impl;
 
 import com.quizguru.quizzes.client.library.LibraryClient;
+import com.quizguru.quizzes.client.record.RecordClient;
+import com.quizguru.quizzes.dto.request.*;
 import com.quizguru.quizzes.dto.response.WordSetResponse;
-import com.quizguru.quizzes.dto.request.QuizGenerateResult;
-import com.quizguru.quizzes.dto.request.QuizRequest;
-import com.quizguru.quizzes.dto.request.RecordItemRequest;
-import com.quizguru.quizzes.dto.request.RecordRequest;
 import com.quizguru.quizzes.dto.request.vocabulary.ListToVocabRequest;
 import com.quizguru.quizzes.dto.request.vocabulary.TextVocabRequest;
 import com.quizguru.quizzes.dto.response.*;
@@ -50,6 +48,7 @@ public class QuizServiceImpl implements QuizService {
     private final QuizRepository quizRepository;
     private final QuestionRepository questionRepository;
     private final LibraryClient libraryClient;
+    private final RecordClient recordClient;
 
     @Override
     public GenerateQuizResponse createQuizByText(BaseRequest baseRequest) {
@@ -179,6 +178,19 @@ public class QuizServiceImpl implements QuizService {
             throw new InvalidRequestException(Constant.ERROR_CODE.INVALID_REQUEST_MSG, ex.getMessage());
         }
 
+    }
+
+    @Override
+    public void submitRecord(RecordRequest recordRequest) {
+        String userId = AuthProvider.getUserId();
+        UpdateRecordRequest updateRecordRequest = UpdateRecordRequest.builder()
+                .quizId(recordRequest.quizId())
+                .recordId(recordRequest.recordId())
+                .recordItems(recordRequest.recordItems())
+                .timeLeft(recordRequest.timeLeft())
+                .userId(userId)
+                .build();
+        recordClient.updateRecord(updateRecordRequest);
     }
 
     @Override
