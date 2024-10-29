@@ -3,3 +3,10 @@ spring:
     name: quizzes
   config:
     import: optional:configserver:http://localhost:8888
+
+keycloak:
+  auth-server-url: http://localhost:7080
+  realm: Quizguru
+  resource: quizguru-cc
+  credentials:
+    secret: e6VTsfrMxuMcqEcrfsBLgC76VPkmRjBs

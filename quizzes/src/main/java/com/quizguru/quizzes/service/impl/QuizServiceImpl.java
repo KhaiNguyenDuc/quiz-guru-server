@@ -1,11 +1,9 @@
 package com.quizguru.quizzes.service.impl;
 
 import com.quizguru.quizzes.client.library.LibraryClient;
+import com.quizguru.quizzes.client.record.RecordClient;
+import com.quizguru.quizzes.dto.request.*;
 import com.quizguru.quizzes.dto.response.WordSetResponse;
-import com.quizguru.quizzes.dto.request.QuizGenerateResult;
-import com.quizguru.quizzes.dto.request.QuizRequest;
-import com.quizguru.quizzes.dto.request.RecordItemRequest;
-import com.quizguru.quizzes.dto.request.RecordRequest;
 import com.quizguru.quizzes.dto.request.vocabulary.ListToVocabRequest;
 import com.quizguru.quizzes.dto.request.vocabulary.TextVocabRequest;
 import com.quizguru.quizzes.dto.response.*;
@@ -21,6 +19,7 @@ import com.quizguru.quizzes.exception.AccessDeniedException;
 import com.quizguru.quizzes.exception.ResourceNotFoundException;
 import com.quizguru.quizzes.mapper.QuizMapper;
 import com.quizguru.quizzes.model.Quiz;
+import com.quizguru.quizzes.repository.ChoiceRepository;
 import com.quizguru.quizzes.repository.QuestionRepository;
 import com.quizguru.quizzes.repository.QuizRepository;
 import com.quizguru.quizzes.service.QuizService;
@@ -40,6 +39,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -49,7 +49,9 @@ public class QuizServiceImpl implements QuizService {
     private final GenerateProducer generateProducer;
     private final QuizRepository quizRepository;
     private final QuestionRepository questionRepository;
+    private final ChoiceRepository choiceRepository;
     private final LibraryClient libraryClient;
+    private final RecordClient recordClient;
 
     @Override
     public GenerateQuizResponse createQuizByText(BaseRequest baseRequest) {
@@ -147,14 +149,13 @@ public class QuizServiceImpl implements QuizService {
     }
 
     @Override
-    public ProvRecordResponse findProvisionDataForRecordById(String quizId, RecordRequest recordRequest) {
+    public ProvRecordResponse findProvisionDataForRecordById(String quizId, List<RecordItemRequest> recordItemRequests) {
 
         Quiz quiz = quizRepository.findById(quizId)
                 .orElseThrow(() -> new ResourceNotFoundException(Constant.ERROR_CODE.RESOURCE_NOT_FOUND, "Quiz", quizId));
 
         try{
             List<RecordItemResponse> recordItemResponses = new ArrayList<>();
-            List<RecordItemRequest> recordItemRequests = recordRequest.recordItems();
             for(RecordItemRequest recordItemRequest: recordItemRequests){
                 Question question = questionRepository.findById(recordItemRequest.questionId())
                         .orElseThrow(() -> new ResourceNotFoundException(Constant.ERROR_CODE.RESOURCE_NOT_FOUND, "Question", recordItemRequest.questionId()));
@@ -179,6 +180,36 @@ public class QuizServiceImpl implements QuizService {
             throw new InvalidRequestException(Constant.ERROR_CODE.INVALID_REQUEST_MSG, ex.getMessage());
         }
 
+    }
+
+    @Override
+    public SubmitRecordResponse submitRecord(RecordRequest recordRequest, String userId) {
+        UpdateRecordRequest updateRecordRequest = UpdateRecordRequest.builder()
+                .quizId(recordRequest.quizId())
+                .userId(userId)
+                .recordId(recordRequest.recordId())
+                .recordItems(recordRequest.recordItems())
+                .timeLeft(recordRequest.timeLeft())
+                .build();
+        String id = recordClient.updateRecord(updateRecordRequest);
+
+        List<RecordItemRequest> recordItemRequests = recordRequest.recordItems();
+        List<String> correctIndex = new ArrayList<>();
+        String questionId = recordItemRequests.get(0).questionId();
+
+        Question question = questionRepository.findById(questionId)
+                .orElseThrow(() -> new ResourceNotFoundException(Constant.ERROR_CODE.RESOURCE_NOT_FOUND, "question", questionId));
+
+        question.getChoices().forEach(choice -> {
+             if(choice.getIsCorrect()){
+                correctIndex.add(choice.getId());
+            }
+        });
+
+        return SubmitRecordResponse.builder()
+                .recordId(id)
+                .correctIndex(correctIndex)
+                .build();
     }
 
     @Override

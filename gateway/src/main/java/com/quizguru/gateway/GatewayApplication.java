@@ -23,9 +23,12 @@ public class GatewayApplication {
     public RouteLocator customRouteLocator(
             RouteLocatorBuilder builder) {
         return builder.routes()
+
                 .route(p -> p
                         .path("/api/v1/quizzes/**")
                         .filters(f -> f
+                                .dedupeResponseHeader("Access-Control-Allow-Credentials", "RETAIN_UNIQUE")
+                                .dedupeResponseHeader("Access-Control-Allow-Origin", "RETAIN_UNIQUE")
                                 .requestRateLimiter(config -> config.setRateLimiter(redisRateLimiter())
                                         .setKeyResolver(userKeyResolver()))
                                 .rewritePath("/api/v1/(?<segment>.*)", "/$\\{segment}")
@@ -59,7 +62,12 @@ public class GatewayApplication {
                         )
                         .uri("lb://customers")
                 )
+//                .route(p -> p
+//                        .path("/quizzes/ws-endpoint/**")
+//                        .uri("lb:ws://customers")
+//                )
                 .build();
+
     }
 
     /***

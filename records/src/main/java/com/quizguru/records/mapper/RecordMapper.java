@@ -27,11 +27,14 @@ public class RecordMapper {
     public static RecordResponse toRecordResponse(Record record) {
 
         List<RecordItemResponse> recordItemResponses = new ArrayList<>();
-        record.getRecordItems().forEach(
-                recordItem -> {
-                    recordItemResponses.add(RecordItemResponse.builder().build());
-                }
-        );
+        if(record.getRecordItems() != null){
+
+            record.getRecordItems().forEach(
+                    recordItem -> {
+                        recordItemResponses.add(RecordItemResponse.builder().build());
+                    }
+            );
+        }
        return RecordResponse.builder()
                     .id(record.getId())
                     .score(record.getScore())
@@ -43,6 +46,7 @@ public class RecordMapper {
                     .createdAt(record.getCreatedAt())
                     .build();
     }
+
 
     public static Record toRecord(RecordRequest recordRequest, String userId, ProvRecordResponse provRecordResponse) {
 
@@ -71,7 +75,7 @@ public class RecordMapper {
 
     }
 
-    private static Integer getScore(List<RecordItemResponse> recordItemResponses) {
+    public static Integer getScore(List<RecordItemResponse> recordItemResponses) {
         String singleChoiceType = QuestionType.SINGLE_CHOICE.getValue();
         String multipleChoiceType = QuestionType.MULTIPLE_CHOICE.getValue();
         AtomicInteger score = new AtomicInteger(0);

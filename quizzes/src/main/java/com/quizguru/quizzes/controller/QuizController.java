@@ -1,6 +1,7 @@
 package com.quizguru.quizzes.controller;
 
 import com.quizguru.quizzes.dto.request.QuizGenerateResult;
+import com.quizguru.quizzes.dto.request.RecordItemRequest;
 import com.quizguru.quizzes.dto.request.RecordRequest;
 import com.quizguru.quizzes.dto.request.text.RawFileRequest;
 import com.quizguru.quizzes.dto.request.vocabulary.ListToVocabRequest;
@@ -15,9 +16,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.CurrentSecurityContext;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
@@ -29,14 +32,16 @@ public class QuizController {
 
     private final QuizService quizService;
 
-    @GetMapping("/test")
-    public ResponseEntity<ApiResponse<String>> getText() {
-        return new ResponseEntity<>(new ApiResponse<>("Text string", "success"), HttpStatus.OK);
-    }
-
-    @PostMapping("/test")
-    public ResponseEntity<ApiResponse<String>> getText(@RequestBody String text) {
-        return new ResponseEntity<>(new ApiResponse<>(text, "success"), HttpStatus.OK);
+    @MessageMapping("/submit")
+    @SendTo("/topic/submit")
+    public ResponseEntity<ApiResponse<SubmitRecordResponse>> submitRecord(
+            @Payload RecordRequest recordRequest,
+            SimpMessageHeaderAccessor headerAccessor
+    ){
+        String userId = (String) headerAccessor.getSessionAttributes().get("user"); // Retrieve the user ID
+        log.error("Current User ID: " + userId);
+        SubmitRecordResponse submitRecordResponse = quizService.submitRecord(recordRequest, userId);
+        return new ResponseEntity<>(new ApiResponse<>(submitRecordResponse, "success"), HttpStatus.OK);
     }
 
     @PostMapping("/text")
@@ -138,9 +143,9 @@ public class QuizController {
     @PostMapping("/internal/prov/record")
     ResponseEntity<ApiResponse<ProvRecordResponse>> findProvisionDataForRecordById(
             @RequestParam("id") String quizId,
-            @RequestBody RecordRequest recordRequest
+            @RequestBody List<RecordItemRequest> recordItemRequests
     ) {
-        ProvRecordResponse responses = quizService.findProvisionDataForRecordById(quizId, recordRequest);
+        ProvRecordResponse responses = quizService.findProvisionDataForRecordById(quizId, recordItemRequests);
         return new ResponseEntity<>(new ApiResponse<>(responses, "success"), HttpStatus.OK);
     }
 
