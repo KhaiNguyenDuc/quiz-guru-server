@@ -62,7 +62,12 @@ public class GatewayApplication {
                         )
                         .uri("lb://customers")
                 )
+//                .route(p -> p
+//                        .path("/quizzes/ws-endpoint/**")
+//                        .uri("lb:ws://customers")
+//                )
                 .build();
+
     }
 
     /***

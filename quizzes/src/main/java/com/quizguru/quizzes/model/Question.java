@@ -7,7 +7,8 @@ import lombok.*;
 
 import java.util.List;
 
-@Data
+@Getter
+@Setter
 @Entity
 @Table(name = "questions")
 @Builder
@@ -23,7 +24,7 @@ public class Question extends DateAudit{
     @Column(name = "query")
     private String query;
 
-    @OneToMany(mappedBy = "question", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Choice> choices;
 
     @Column(name = "explanation",  columnDefinition = "LONGTEXT")

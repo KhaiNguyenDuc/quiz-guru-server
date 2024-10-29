@@ -10,6 +10,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 public interface RecordClient {
 
     @PutMapping("/records/internal/update")
-    void updateRecord(UpdateRecordRequest updateRecordRequest);
+    String updateRecord(@RequestBody UpdateRecordRequest updateRecordRequest);
 
 }

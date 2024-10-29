@@ -19,9 +19,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
-import org.springframework.security.core.annotation.CurrentSecurityContext;
+import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
@@ -35,11 +34,14 @@ public class QuizController {
 
     @MessageMapping("/submit")
     @SendTo("/topic/submit")
-    public ResponseEntity<ApiResponse<RecordRequest>> submitRecord(
-            @Payload RecordRequest recordRequest
+    public ResponseEntity<ApiResponse<SubmitRecordResponse>> submitRecord(
+            @Payload RecordRequest recordRequest,
+            SimpMessageHeaderAccessor headerAccessor
     ){
-        quizService.submitRecord(recordRequest);
-        return new ResponseEntity<>(new ApiResponse<>(recordRequest, "success"), HttpStatus.OK);
+        String userId = (String) headerAccessor.getSessionAttributes().get("user"); // Retrieve the user ID
+        log.error("Current User ID: " + userId);
+        SubmitRecordResponse submitRecordResponse = quizService.submitRecord(recordRequest, userId);
+        return new ResponseEntity<>(new ApiResponse<>(submitRecordResponse, "success"), HttpStatus.OK);
     }
 
     @PostMapping("/text")
@@ -141,9 +143,9 @@ public class QuizController {
     @PostMapping("/internal/prov/record")
     ResponseEntity<ApiResponse<ProvRecordResponse>> findProvisionDataForRecordById(
             @RequestParam("id") String quizId,
-            @RequestBody RecordRequest recordRequest
+            @RequestBody List<RecordItemRequest> recordItemRequests
     ) {
-        ProvRecordResponse responses = quizService.findProvisionDataForRecordById(quizId, recordRequest);
+        ProvRecordResponse responses = quizService.findProvisionDataForRecordById(quizId, recordItemRequests);
         return new ResponseEntity<>(new ApiResponse<>(responses, "success"), HttpStatus.OK);
     }
 

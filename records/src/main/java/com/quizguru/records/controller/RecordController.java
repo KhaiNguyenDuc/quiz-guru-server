@@ -40,18 +40,19 @@ public class RecordController {
     }
 
     @PutMapping("/internal/update")
-    public void updateRecord(UpdateRecordRequest updateRecordRequest) {
+    public String updateRecord(@RequestBody UpdateRecordRequest updateRecordRequest) {
 
         if(updateRecordRequest.recordId() != null && updateRecordRequest.recordId() != "") {
             recordService.updateRecord(updateRecordRequest);
+            return "";
         }
         RecordRequest recordRequest = RecordRequest.builder()
                 .recordItems(updateRecordRequest.recordItems())
-                .recordId(updateRecordRequest.recordId())
                 .quizId(updateRecordRequest.quizId())
                 .timeLeft(updateRecordRequest.timeLeft())
                 .build();
-        recordService.createRecord(recordRequest, updateRecordRequest.recordId());
+        RecordResponse recordResponse = recordService.createRecord(recordRequest, updateRecordRequest.userId());
+        return recordResponse.id();
     }
 
 

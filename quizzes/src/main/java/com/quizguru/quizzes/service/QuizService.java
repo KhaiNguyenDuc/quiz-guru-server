@@ -41,7 +41,7 @@ public interface QuizService {
 
     DetailQuizResponse findDetailQuizById(String quizId);
 
-    ProvRecordResponse findProvisionDataForRecordById(String quizId, RecordRequest recordRequest);
+    ProvRecordResponse findProvisionDataForRecordById(String quizId, List<RecordItemRequest> recordItemRequests);
 
-    void submitRecord(RecordRequest recordRequest);
+    SubmitRecordResponse submitRecord(RecordRequest recordRequest, String userId);
 }
