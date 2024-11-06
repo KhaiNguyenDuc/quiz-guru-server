@@ -1,23 +1,23 @@
 version: '3'
 
 services:
-  mysql:
-    image: mysql:8.0
-    container_name: mysql-db
-    environment:
-      - MYSQL_ROOT_PASSWORD
-    ports:
-      - "3305:3306"
-    volumes:
-      - ./init-scripts:/docker-entrypoint-initdb.d # Mount init scripts
-    healthcheck:
-      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-    extends:
-      file: common-service.yml
-      service: network-base-config
+#  mysql:
+#    image: mysql:8.0
+#    container_name: mysql-db
+#    environment:
+#      - MYSQL_ROOT_PASSWORD
+#    ports:
+#      - "3305:3306"
+#    volumes:
+#      - ./init-scripts:/docker-entrypoint-initdb.d # Mount init scripts
+#    healthcheck:
+#      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+#      interval: 30s
+#      timeout: 10s
+#      retries: 5
+#    extends:
+#      file: common-service.yml
+#      service: network-base-config
   rabbitmq:
     image: rabbitmq:management
     container_name: rabbitmq
@@ -30,40 +30,40 @@ services:
     extends:
       file: common-service.yml
       service: network-base-config
-  identity:
-    image: quay.io/keycloak/keycloak:23.0.6
-    command:
-      - "start-dev"
-      - "--import-realm"
-    environment:
-      - KEYCLOAK_ADMIN
-      - KEYCLOAK_ADMIN_PASSWORD
-      - KC_DB
-      - KC_DB_USERNAME
-      - KC_DB_PASSWORD
-      - KC_DB_URL
-    ports:
-      - "7080:8080"
-    volumes:
-      - ../../keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json
-      - ../../keycloak/themes/quizguru/theme:/opt/keycloak/themes
-    extends:
-      file: common-service.yml
-      service: network-base-config
-    depends_on:
-      mysql:
-        condition: service_healthy
-  redis:
-    image: redis
-    ports:
-      - "6379:6379"
-    healthcheck:
-      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
-      timeout: 10s
-      retries: 10
-    extends:
-      file: common-service.yml
-      service: network-base-config
+#  identity:
+#    image: quay.io/keycloak/keycloak:23.0.6
+#    command:
+#      - "start-dev"
+#      - "--import-realm"
+#    environment:
+#      - KEYCLOAK_ADMIN
+#      - KEYCLOAK_ADMIN_PASSWORD
+#      - KC_DB
+#      - KC_DB_USERNAME
+#      - KC_DB_PASSWORD
+#      - KC_DB_URL
+#    ports:
+#      - "7080:8080"
+#    volumes:
+#      - ../../keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json
+#      - ../../keycloak/themes/quizguru/theme:/opt/keycloak/themes
+#    extends:
+#      file: common-service.yml
+#      service: network-base-config
+#    depends_on:
+#      mysql:
+#        condition: service_healthy
+#  redis:
+#    image: redis
+#    ports:
+#      - "6379:6379"
+#    healthcheck:
+#      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
+#      timeout: 10s
+#      retries: 10
+#    extends:
+#      file: common-service.yml
+#      service: network-base-config
 
 networks:
   quizguru:

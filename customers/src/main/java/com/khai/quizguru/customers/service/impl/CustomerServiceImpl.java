@@ -13,6 +13,7 @@ import com.khai.quizguru.customers.service.CustomerService;
 import com.khai.quizguru.customers.utils.Constant;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.keycloak.admin.client.CreatedResponseUtil;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.RealmResource;
@@ -29,6 +30,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CustomerServiceImpl implements CustomerService {
@@ -112,6 +114,7 @@ public class CustomerServiceImpl implements CustomerService {
         String id = SecurityContextHolder.getContext().getAuthentication().getName();
         UserRepresentation userRepresentation =
                 keycloak.realm(keycloakProperties.getRealm()).users().get(id).toRepresentation();
+        log.info("UserId: {}", id);
         if (userRepresentation != null) {
             userRepresentation.setFirstName(customerUpdateRequest.firstName());
             userRepresentation.setLastName(customerUpdateRequest.lastName());

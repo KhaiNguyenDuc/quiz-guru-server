@@ -4,6 +4,7 @@ import com.quizguru.quizzes.utils.KeycloakRoleConverter;
 import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.keycloak.adapters.KeycloakDeployment;
 import org.keycloak.adapters.KeycloakDeploymentBuilder;
 import org.keycloak.adapters.rotation.AdapterTokenVerifier;
 import org.keycloak.adapters.springboot.KeycloakSpringBootProperties;
@@ -32,29 +33,21 @@ import java.util.Map;
 public class StompHandshakeInterceptor implements HandshakeInterceptor {
 
     private final KeycloakSpringBootProperties configuration;
-    private final KeycloakRoleConverter keycloakRoleConverter;
 
     @Override
     public boolean beforeHandshake(ServerHttpRequest req, ServerHttpResponse resp, WebSocketHandler h, Map<String, Object> atts) {
+        log.info("Before handshake");
         List<String> protocols = req.getHeaders().get("Sec-WebSocket-Protocol");
+        log.info("protocols: " + protocols);
         try {
             String token = protocols.get(0).split(", ")[2];
             log.debug("Token: " + token);
-            AccessToken accessToken = AdapterTokenVerifier.verifyToken(token, KeycloakDeploymentBuilder.build(configuration));
+            KeycloakDeployment deployment = KeycloakDeploymentBuilder.build(configuration);
+
+            AccessToken accessToken = AdapterTokenVerifier.verifyToken(token, deployment);
 
             resp.setStatusCode(HttpStatus.SWITCHING_PROTOCOLS);
             log.debug("token valid");
-//            String keycloakUrl = configuration.getAuthServerUrl(); // Get Keycloak server URL
-//            String realmName = configuration.getRealm(); // Get the realm name
-//            String jwkSetUri = keycloakUrl + "/realms/" + realmName + "/protocol/openid-connect/certs";
-//            JwtDecoder jwtDecoder = NimbusJwtDecoder.withJwkSetUri(jwkSetUri).build();
-//            Jwt jwt = jwtDecoder.decode(token);
-//            Authentication authentication = new UsernamePasswordAuthenticationToken(
-//                    accessToken.getSubject(),
-//                    null,
-//                    keycloakRoleConverter.convert(jwt)
-//            );
-//            SecurityContextHolder.getContext().setAuthentication(authentication);
             atts.put("user", accessToken.getSubject());
 
         } catch (IndexOutOfBoundsException e) {

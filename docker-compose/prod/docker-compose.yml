@@ -18,6 +18,29 @@ services:
     extends:
       file: common-service.yml
       service: network-base-config
+  identity:
+    image: quay.io/keycloak/keycloak:23.0.6
+    command:
+      - "start-dev"
+      - "--import-realm"
+    environment:
+      - KEYCLOAK_ADMIN
+      - KEYCLOAK_ADMIN_PASSWORD
+      - KC_DB
+      - KC_DB_USERNAME
+      - KC_DB_PASSWORD
+      - KC_DB_URL
+    ports:
+      - "8080:8080"
+    volumes:
+      - ../../keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json
+      - ../../keycloak/themes/quizguru/theme:/opt/keycloak/themes
+    extends:
+      file: common-service.yml
+      service: network-base-config
+    depends_on:
+      mysql:
+        condition: service_healthy
   tempo:
     image: grafana/tempo:2.4.2
     container_name: tempo
@@ -39,6 +62,14 @@ services:
     ports:
       - "5672:5672"
       - "15672:15672"
+    healthcheck:
+      test: [ "CMD", "rabbitmq-diagnostics", "status" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    extends:
+      file: common-service.yml
+      service: network-base-config
   redis:
     image: redis
     ports:
@@ -139,11 +170,11 @@ services:
       - |
         /run.sh
     ports:
-      - "3000:3000"
+      - "3001:3000"
     volumes:
       - ../observability/grafana/datasource.yml:/etc/grafana/provisioning/datasources/datasource.yml
     healthcheck:
-      test: [ "CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3000/api/health || exit 1" ]
+      test: [ "CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3001/api/health || exit 1" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -305,31 +336,6 @@ services:
     environment:
       - OTEL_SERVICE_NAME=${OTEL_GATEWAY_SERVICE_NAME}
       - SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK
-  auth-server:
-    image: "quizguru/auth:1.0"
-    container_name: auth-ms
-    build:
-      context: ../../authserver
-      dockerfile: Dockerfile
-    ports:
-      - "8086:8086"
-    healthcheck:
-      test: "wget -qO- http://localhost:8086/actuator/health/readiness | grep UP || exit 1"
-      interval: 20s
-      timeout: 10s
-      retries: 20
-    depends_on:
-      config-server:
-        condition: service_healthy
-      eureka-server:
-        condition: service_healthy
-      mysql:
-        condition: service_healthy
-    extends:
-      file: common-service.yml
-      service: microservice-eureka-config
-    environment:
-      - OTEL_SERVICE_NAME=${OTEL_AUTH_SERVICE_NAME}
   generate-server:
     image: "quizguru/generates:1.0"
     container_name: generate-ms
@@ -347,6 +353,10 @@ services:
       eureka-server:
         condition: service_healthy
       mysql:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      quiz-server:
         condition: service_healthy
     extends:
       file: common-service.yml
@@ -382,6 +392,8 @@ services:
     build:
       context: ../../quizzes
       dockerfile: Dockerfile
+    ports:
+      - "8083:8083"
     healthcheck:
       test: "wget -qO- http://localhost:8083/actuator/health/readiness | grep UP || exit 1"
       interval: 20s
@@ -394,11 +406,14 @@ services:
         condition: service_healthy
       mysql:
         condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     extends:
       file: common-service.yml
       service: microservice-eureka-config
     environment:
       - OTEL_SERVICE_NAME=${OTEL_QUIZ_SERVICE_NAME}
+      - SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK
   record-server:
     image: "quizguru/record:1.0"
     container_name: record-ms
@@ -422,14 +437,14 @@ services:
       service: microservice-eureka-config
     environment:
       - OTEL_SERVICE_NAME=${OTEL_RECORD_SERVICE_NAME}
-  user-server:
-    image: "quizguru/user:1.0"
-    container_name: user-ms
+  customer-server:
+    image: "quizguru/customer:1.0"
+    container_name: customer-ms
     build:
-      context: ../../users
+      context: ../../customer
       dockerfile: Dockerfile
     healthcheck:
-      test: "wget -qO- http://localhost:8081/actuator/health/readiness | grep UP || exit 1"
+      test: "wget -qO- http://localhost:8086/actuator/health/readiness | grep UP || exit 1"
       interval: 20s
       timeout: 10s
       retries: 20
@@ -444,7 +459,8 @@ services:
       file: common-service.yml
       service: microservice-eureka-config
     environment:
-      - OTEL_SERVICE_NAME=${OTEL_USER_SERVICE_NAME}
+      - OTEL_SERVICE_NAME=${OTEL_CUSTOMER_SERVICE_NAME}
+      - SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK
 networks:
   quizguru:
     driver: "bridge"
