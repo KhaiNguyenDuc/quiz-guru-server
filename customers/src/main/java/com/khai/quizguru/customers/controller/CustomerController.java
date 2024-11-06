@@ -16,24 +16,19 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("customers")
+@RequestMapping("/customers")
 @RequiredArgsConstructor
 @Slf4j
 public class CustomerController {
 
     private final CustomerService customerService;
 
-    @PostMapping("/test")
-    public String test(){
-        String id = SecurityContextHolder.getContext().getAuthentication().getName();
-        return id;
-    }
-
     @GetMapping("/internal/users/role")
     public ResponseEntity<ApiResponse> findRoleFromUserId(@RequestParam("userId") String userId){
         List<String> roleName = customerService.findRoleFromUserId(userId);
         log.info("start findRoleFromUserId");
         ApiResponse response = new ApiResponse(roleName, "Success");
+        log.info(response.toString());
         log.info("end findRoleFromUserId");
         return new ResponseEntity<>(response, HttpStatus.OK);
     }

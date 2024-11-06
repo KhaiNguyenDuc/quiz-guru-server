@@ -1,0 +1,15 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: keycloak-deployment
+spec:
+  selector:
+    matchLabels:
+      app: keycloak
+  template:
+    metadata:
+      name: keycloak-pod
+    spec:
+      containers:
+        - name: keycloak
+          image:

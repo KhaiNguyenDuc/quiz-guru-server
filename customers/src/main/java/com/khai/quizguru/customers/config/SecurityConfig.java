@@ -29,7 +29,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(grantedAuthoritiesExtractor())))
                 .authorizeHttpRequests(requests -> requests
-                        .requestMatchers("/api/v1/customers/profile/**").hasRole("USER")
+                        .requestMatchers("/customers/profile/**").hasRole("USER")
                         .anyRequest().permitAll()
                 );
         return http.build();
