@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: configserver-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: configserver
+  template:
+    metadata:
+      name: configserver-pod
+      labels:
+        app: configserver
+    spec:
+      containers:
+        - name: configserver
+          image: nguyenduckhai/configserver:1.0
+          ports:
+            - containerPort: 8888
+          env:
+            - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+              valueFrom:
+                configMapKeyRef:
+                  name: quizguru-config-maps
+                  key: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: config-server
+spec:
+  type: LoadBalancer
+  selector:
+    app: configserver
+  ports:
+    - port: 8888
+      targetPort: 8888
+      protocol: TCP
