@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: eureka-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: eureka
+  template:
+    metadata:
+      name: eureka-pod
+      labels:
+        app: eureka
+    spec:
+      containers:
+        - name: eureka
+          image: nguyenduckhai/eureka:1.0
+          ports:
+            - containerPort: 8761
+          env:
+            - name: SPRING_CONFIG_IMPORT
+              valueFrom:
+                configMapKeyRef:
+                  name: quizguru-config-maps
+                  key: SPRING_CONFIG_IMPORT
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: eureka
+spec:
+  type: LoadBalancer
+  selector:
+    app: eureka
+  ports:
+    - port: 8761
+      targetPort: 8761
+      protocol: TCP

@@ -19,7 +19,7 @@ services:
     extends:
       service: microservice-base-config
     environment:
-      - SPRING_PROFILES_ACTIVE:=${profile_prod}
+      - SPRING_PROFILES_ACTIVE:=${PROFILE_PROD}
       - SPRING_CONFIG_IMPORT
 
   microservice-eureka-config:

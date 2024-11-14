@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: generate-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: generate
+  template:
+    metadata:
+      name: generate-pod
+      labels:
+        app: generate
+    spec:
+      containers:
+        - name: generate
+          image: nguyenduckhai/generates:1.0
+          ports:
+            - containerPort: 8085
+          env:
+            - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+              valueFrom:
+                configMapKeyRef:
+                  name: quizguru-config-maps
+                  key: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+            - name: SPRING_CONFIG_IMPORT
+              valueFrom:
+                configMapKeyRef:
+                  name: quizguru-config-maps
+                  key: SPRING_CONFIG_IMPORT
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: generate
+spec:
+  type: LoadBalancer
+  selector:
+    app: generate
+  ports:
+    - port: 8085
+      targetPort: 8085
+      protocol: TCP

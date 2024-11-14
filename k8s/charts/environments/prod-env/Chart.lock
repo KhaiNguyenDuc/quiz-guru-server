@@ -1,0 +1,30 @@
+dependencies:
+- name: common
+  repository: file://../../common
+  version: 0.1.0
+- name: configserver
+  repository: file://../../services/configserver
+  version: 0.1.0
+- name: customers
+  repository: file://../../services/customers
+  version: 0.1.0
+- name: eureka
+  repository: file://../../services/eureka
+  version: 0.1.0
+- name: gateway
+  repository: file://../../services/gateway
+  version: 0.1.0
+- name: generates
+  repository: file://../../services/generates
+  version: 0.1.0
+- name: libraries
+  repository: file://../../services/libraries
+  version: 0.1.0
+- name: quizzes
+  repository: file://../../services/quizzes
+  version: 0.1.0
+- name: records
+  repository: file://../../services/records
+  version: 0.1.0
+digest: sha256:a6798f3c2eec58ea851f8998584be81dcc97f9bf9f0868769c34d5b159670d2e
+generated: "2024-11-14T20:43:30.715554341+07:00"

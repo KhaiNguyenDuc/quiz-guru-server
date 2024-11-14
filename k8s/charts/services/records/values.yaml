@@ -1,0 +1,25 @@
+deploymentName: records-deployment
+serviceName: records
+appLabel: records
+appName: records
+
+replicaCount: 1
+
+image:
+  repository: nguyenduckhai/record
+  tag: 1.0
+
+containerPort: 8082
+
+service:
+  type: ClusterIP
+  port: 8082
+  targetPort: 8082
+
+appname_enabled: true
+profile_enabled: true
+config_enabled: true
+eureka_enabled: true
+resouceserver_enabled: false
+otel_enabled: true
+rabbitmq_enabled: false

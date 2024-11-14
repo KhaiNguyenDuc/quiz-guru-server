@@ -1,6 +1,7 @@
 package com.quizguru.records.controller;
 
 import com.quizguru.records.dto.request.RecordRequest;
+import com.quizguru.records.dto.request.UpdateRecordRequest;
 import com.quizguru.records.dto.response.ApiResponse;
 import com.quizguru.records.dto.response.PageResponse;
 import com.quizguru.records.dto.response.RecordResponse;
@@ -33,9 +34,27 @@ public class RecordController {
 
     @PostMapping
     public ResponseEntity<ApiResponse<RecordResponse>> createRecord(@RequestBody RecordRequest recordRequest) {
-        RecordResponse records = recordService.createRecord(recordRequest);
+        String userId = SecurityContextHolder.getContext().getAuthentication().getName();
+        RecordResponse records = recordService.createRecord(recordRequest, userId);
         return new ResponseEntity<>(new ApiResponse<>(records, "success"), HttpStatus.CREATED);
     }
+
+    @PutMapping("/internal/update")
+    public String updateRecord(@RequestBody UpdateRecordRequest updateRecordRequest) {
+
+        if(updateRecordRequest.recordId() != null && updateRecordRequest.recordId() != "") {
+            recordService.updateRecord(updateRecordRequest);
+            return "";
+        }
+        RecordRequest recordRequest = RecordRequest.builder()
+                .recordItems(updateRecordRequest.recordItems())
+                .quizId(updateRecordRequest.quizId())
+                .timeLeft(updateRecordRequest.timeLeft())
+                .build();
+        RecordResponse recordResponse = recordService.createRecord(recordRequest, updateRecordRequest.userId());
+        return recordResponse.id();
+    }
+
 
     @GetMapping
     public ResponseEntity<ApiResponse<RecordResponse>> findByd(@RequestParam("id") String recordId) {

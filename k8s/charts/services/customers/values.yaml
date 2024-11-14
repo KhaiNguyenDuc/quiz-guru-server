@@ -1,0 +1,25 @@
+deploymentName: customers-deployment
+serviceName: customers
+appLabel: customers
+appName: customers
+
+replicaCount: 1
+
+image:
+  repository: nguyenduckhai/customer
+  tag: 1.0
+
+containerPort: 8086
+
+service:
+  type: ClusterIP
+  port: 8086
+  targetPort: 8086
+
+appname_enabled: true
+profile_enabled: true
+config_enabled: true
+eureka_enabled: true
+resouceserver_enabled: true
+otel_enabled: true
+rabbitmq_enabled: false

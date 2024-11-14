@@ -1,6 +1,7 @@
 package com.quizguru.quizzes.service;
 
 import com.quizguru.quizzes.dto.request.QuizGenerateResult;
+import com.quizguru.quizzes.dto.request.RecordItemRequest;
 import com.quizguru.quizzes.dto.request.RecordRequest;
 import com.quizguru.quizzes.dto.request.text.RawFileRequest;
 import com.quizguru.quizzes.dto.request.vocabulary.ListToVocabRequest;
@@ -40,6 +41,7 @@ public interface QuizService {
 
     DetailQuizResponse findDetailQuizById(String quizId);
 
-    ProvRecordResponse findProvisionDataForRecordById(String quizId, RecordRequest recordRequest);
+    ProvRecordResponse findProvisionDataForRecordById(String quizId, List<RecordItemRequest> recordItemRequests);
 
+    SubmitRecordResponse submitRecord(RecordRequest recordRequest, String userId);
 }

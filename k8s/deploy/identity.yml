@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: identity-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: identity
+  template:
+    metadata:
+      name: identity-pod
+      labels:
+        app: identity
+    spec:
+      containers:
+        - name: identity
+          image: quay.io/keycloak/keycloak:23.0.6
+          args: ["start-dev"]
+          env:
+            - name: KEYCLOAK_ADMIN
+              valueFrom:
+                configMapKeyRef:
+                  name: quizguru-config-maps
+                  key: KEYCLOAK_ADMIN
+            - name: KEYCLOAK_ADMIN_PASSWORD
+              valueFrom:
+                configMapKeyRef:
+                  name: quizguru-config-maps
+                  key: KEYCLOAK_ADMIN_PASSWORD
+            - name: KC_DB
+              valueFrom:
+                configMapKeyRef:
+                  name: quizguru-config-maps
+                  key: KC_DB
+            - name: KC_DB_USERNAME
+              valueFrom:
+                configMapKeyRef:
+                  name: quizguru-config-maps
+                  key: KC_DB_USERNAME
+            - name: KC_DB_PASSWORD
+              valueFrom:
+                configMapKeyRef:
+                  name: quizguru-config-maps
+                  key: KC_DB_PASSWORD
+            - name: KC_DB_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: quizguru-config-maps
+                  key: KC_DB_URL
+          ports:
+            - containerPort: 8080
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: identity
+spec:
+  type: LoadBalancer
+  selector:
+    app: identity
+  ports:
+    - port: 8080
+      targetPort: 8080
+      protocol: TCP

@@ -1,0 +1,25 @@
+deploymentName: configserver-deployment
+serviceName: configserver
+appLabel: configserver
+appName: configserver
+
+replicaCount: 1
+
+image:
+  repository: nguyenduckhai/configserver
+  tag: 1.0
+
+containerPort: 8888
+
+service:
+  type: ClusterIP
+  port: 8888
+  targetPort: 8888
+
+appname_enabled: true
+profile_enabled: true
+config_enabled: true
+eureka_enabled: true
+resouceserver_enabled: false
+otel_enabled: true
+rabbitmq_enabled: false

@@ -1,0 +1,25 @@
+{{- define "common.configmap" -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.global.configMapName }}
+data:
+  RABBITMQ_DEFAULT_USER: {{ .Values.global.rabbitmqUsername }}
+  RABBITMQ_DEFAULT_PASS: {{ .Values.global.rabbitmqPass }}
+  SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK: {{ .Values.global.keycloakUrl }}
+  SPRING_CONFIG_IMPORT: {{ .Values.global.configServerURl }}
+  MYSQL_ROOT_PASSWORD: {{ .Values.global.mysqlPass }}
+  KEYCLOAK_ADMIN: {{ .Values.global.keycloakAdminUsername }}
+  KEYCLOAK_ADMIN_PASSWORD: {{ .Values.global.keycloakAdminPassword }}
+  KC_DB: {{ .Values.global.keycloakDBName }}
+  KC_DB_USERNAME: {{ .Values.global.keycloakDBUsername }}
+  KC_DB_PASSWORD: {{ .Values.global.keycloakDBPassword }}
+  KC_DB_URL: {{ .Values.global.keycloakDBURL }}
+  EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: {{ .Values.global.eurekaServerURL }}
+  SPRING_PROFILES_ACTIVE: {{ .Values.global.activeProfile }}
+  JAVA_TOOL_OPTIONS: {{ .Values.global.openTelemetryJavaAgent }}
+  OTEL_EXPORTER_OTLP_ENDPOINT: {{ .Values.global.otelEndpoint }}
+  OTEL_METRICS_EXPORTER: {{ .Values.global.otelMetricsExporter }}
+  OTEL_LOGS_EXPORTER: {{ .Values.global.otelLogsExporter }}
+  OTEL_EXPORTER_OTLP_PROTOCOL: {{ .Values.global.otelProtocol }}
+{{- end -}}

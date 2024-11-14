@@ -1,0 +1,25 @@
+deploymentName: generates-deployment
+serviceName: generates
+appLabel: generates
+appName: generates
+
+replicaCount: 1
+
+image:
+  repository: nguyenduckhai/generates
+  tag: 1.0
+
+containerPort: 8085
+
+service:
+  type: ClusterIP
+  port: 8085
+  targetPort: 8085
+
+appname_enabled: true
+profile_enabled: true
+config_enabled: true
+eureka_enabled: true
+resouceserver_enabled: false
+otel_enabled: true
+rabbitmq_enabled: true
