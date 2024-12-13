@@ -1,0 +1,25 @@
+deploymentName: eureka-deployment
+serviceName: eureka
+appLabel: eureka
+appName: eureka
+
+replicaCount: 1
+
+image:
+  repository: nguyenduckhai/eureka
+  tag: 1.0
+
+containerPort: 8761
+
+service:
+  type: ClusterIP
+  port: 8761
+  targetPort: 8761
+
+appname_enabled: true
+profile_enabled: true
+config_enabled: true
+eureka_enabled: true
+resouceserver_enabled: false
+otel_enabled: true
+rabbitmq_enabled: false

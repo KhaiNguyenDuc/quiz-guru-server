@@ -1,0 +1,25 @@
+deploymentName: gateway-deployment
+serviceName: gateway
+appLabel: gateway
+appName: gateway
+
+replicaCount: 1
+
+image:
+  repository: nguyenduckhai/gateway
+  tag: 1.0
+
+containerPort: 8072
+
+service:
+  type: ClusterIP
+  port: 8072
+  targetPort: 8072
+
+appname_enabled: true
+profile_enabled: true
+config_enabled: true
+eureka_enabled: true
+resouceserver_enabled: true
+otel_enabled: true
+rabbitmq_enabled: false

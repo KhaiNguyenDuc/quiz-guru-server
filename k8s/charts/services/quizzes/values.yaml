@@ -1,0 +1,25 @@
+deploymentName: quizzes-deployment
+serviceName: quizzes
+appLabel: quizzes
+appName: quizzes
+
+replicaCount: 1
+
+image:
+  repository: nguyenduckhai/quiz
+  tag: 1.0
+
+containerPort: 8083
+
+service:
+  type: ClusterIP
+  port: 8083
+  targetPort: 8083
+
+appname_enabled: true
+profile_enabled: true
+config_enabled: true
+eureka_enabled: true
+resouceserver_enabled: true
+otel_enabled: true
+rabbitmq_enabled: true

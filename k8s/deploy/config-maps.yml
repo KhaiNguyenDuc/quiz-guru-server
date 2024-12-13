@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: quizguru-config-maps
+data:
+  PROFILE_DEFAULT: "default"
+  RABBITMQ_DEFAULT_USER: "guest"
+  RABBITMQ_DEFAULT_PASS: "guest"
+  SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK: "http://identity:8080/realms/Quizguru/protocol/openid-connect/certs"
+  SPRING_CONFIG_IMPORT: "configserver:http://config-server:8888/"
+  MYSQL_ROOT_PASSWORD: "k989898k"
+  KEYCLOAK_ADMIN: "admin"
+  KEYCLOAK_ADMIN_PASSWORD: "admin"
+  KC_DB: "mysql"
+  KC_DB_USERNAME: "root"
+  KC_DB_PASSWORD: "k989898k"
+  KC_DB_URL: "jdbc:mysql://mysql/keycloak"
+  EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: "http://eureka:8761/eureka/"
+  SPRING_PROFILES_ACTIVE: "qa"
+  JAVA_TOOL_OPTIONS: "-javaagent:/opentelemetry-javaagent.jar"
+  OTEL_EXPORTER_OTLP_ENDPOINT: "http://tempo:4317"
+  OTEL_METRICS_EXPORTER: "none"
+  OTEL_LOGS_EXPORTER: "none"
+  OTEL_EXPORTER_OTLP_PROTOCOL: "grpc"

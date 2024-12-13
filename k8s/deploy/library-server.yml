@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: library-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: library
+  template:
+    metadata:
+      name: library-pod
+      labels:
+        app: library
+    spec:
+      containers:
+        - name: library
+          image: nguyenduckhai/library:1.0
+          ports:
+            - containerPort: 8084
+          env:
+            - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+              valueFrom:
+                configMapKeyRef:
+                  name: quizguru-config-maps
+                  key: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+            - name: SPRING_CONFIG_IMPORT
+              valueFrom:
+                configMapKeyRef:
+                  name: quizguru-config-maps
+                  key: SPRING_CONFIG_IMPORT
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: library
+spec:
+  type: LoadBalancer
+  selector:
+    app: library
+  ports:
+    - port: 8084
+      targetPort: 8084
+      protocol: TCP

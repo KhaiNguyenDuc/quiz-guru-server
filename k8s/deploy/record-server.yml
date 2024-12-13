@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: record-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: record
+  template:
+    metadata:
+      name: record-pod
+      labels:
+        app: record
+    spec:
+      containers:
+        - name: record
+          image: nguyenduckhai/record:1.0
+          ports:
+            - containerPort: 8082
+          env:
+            - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+              valueFrom:
+                configMapKeyRef:
+                  name: quizguru-config-maps
+                  key: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+            - name: SPRING_CONFIG_IMPORT
+              valueFrom:
+                configMapKeyRef:
+                  name: quizguru-config-maps
+                  key: SPRING_CONFIG_IMPORT
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: record
+spec:
+  type: LoadBalancer
+  selector:
+    app: record
+  ports:
+    - port: 8082
+      targetPort: 8082
+      protocol: TCP
