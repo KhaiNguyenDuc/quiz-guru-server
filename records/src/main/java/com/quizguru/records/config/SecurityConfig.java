@@ -29,6 +29,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(grantedAuthoritiesExtractor())))
                 .authorizeHttpRequests(requests -> requests
+                        .requestMatchers("/records/internal/**").permitAll()
                         .requestMatchers("/records/**").hasRole("USER")
                         .anyRequest().permitAll()
                 );

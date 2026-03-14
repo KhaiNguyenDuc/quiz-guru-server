@@ -184,13 +184,13 @@ public class QuizServiceImpl implements QuizService {
 
     @Override
     public SubmitRecordResponse submitRecord(RecordRequest recordRequest, String userId) {
-        UpdateRecordRequest updateRecordRequest = UpdateRecordRequest.builder()
-                .quizId(recordRequest.quizId())
-                .userId(userId)
-                .recordId(recordRequest.recordId())
-                .recordItems(recordRequest.recordItems())
-                .timeLeft(recordRequest.timeLeft())
-                .build();
+        UpdateRecordRequest updateRecordRequest = new UpdateRecordRequest(
+                userId,
+                recordRequest.recordId(),
+                recordRequest.quizId(),
+                recordRequest.recordItems(),
+                recordRequest.timeLeft()
+        );
         String id = recordClient.updateRecord(updateRecordRequest);
 
         List<RecordItemRequest> recordItemRequests = recordRequest.recordItems();

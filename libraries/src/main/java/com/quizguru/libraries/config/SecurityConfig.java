@@ -29,6 +29,8 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(grantedAuthoritiesExtractor())))
                 .authorizeHttpRequests(requests -> requests
+                        .requestMatchers("/libraries/internal/**").permitAll()
+                        .requestMatchers("/libraries/word-set").permitAll()
                         .requestMatchers("/libraries/**").hasRole("USER")
                         .anyRequest().permitAll()
                 );

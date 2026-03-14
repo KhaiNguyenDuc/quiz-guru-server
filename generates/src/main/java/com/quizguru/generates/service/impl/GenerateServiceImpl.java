@@ -10,17 +10,20 @@ import com.quizguru.generates.client.library.dto.request.WordSetRequest;
 import com.quizguru.generates.client.quiz.QuizClient;
 import com.quizguru.generates.client.quiz.dto.request.QuizGenerateResult;
 import com.quizguru.generates.client.quiz.dto.request.QuizRequest;
-import com.quizguru.generates.dto.Message;
+import com.quizguru.generates.dto.AIRequestBuilder;
+import com.quizguru.generates.dto.AIRequestFactory;
 import com.quizguru.generates.dto.request.*;
 import com.quizguru.generates.dto.request.vocabulary.VocabularyPromptRequest;
+import com.quizguru.generates.dto.response.AIResponse;
 import com.quizguru.generates.dto.response.ApiResponse;
 import com.quizguru.generates.exception.ResourceNotFoundException;
 import com.quizguru.generates.properties.GenerateProperties;
-import com.quizguru.generates.dto.response.ChatResponse;
 import com.quizguru.generates.service.GenerateService;
 import com.quizguru.generates.utils.Constant;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -41,6 +44,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
     public class GenerateServiceImpl implements GenerateService {
 
+    private final GenerateProperties generateProperties;
     private final RestTemplate restTemplate;
     private final QuizClient quizClient;
     private final LibraryClient libraryClient;
@@ -51,16 +55,32 @@ import java.util.stream.Collectors;
     public void generateQuiz(ChatRequest chat, String userId) {
         try {
             this.setSecurityContextFromHeaders(userId);
-            GenerateProperties generateConfiguration = chat.getGenerateConfiguration();
-            ChatResponse chatResponse = restTemplate.postForObject(generateConfiguration.getApiURL(), chat, ChatResponse.class);
+
+            String provider = chat.getGenerateConfiguration() != null && chat.getGenerateConfiguration().getProvider() != null && !chat.getGenerateConfiguration().getProvider().isBlank()
+                    ? chat.getGenerateConfiguration().getProvider()
+                    : generateProperties.getProvider();
+
+            GenerateProperties.Provider providerConfig = generateProperties.resolve(provider);
+
+            AIRequestBuilder builder = AIRequestFactory.getBuilder(provider);
+            Object request = builder.buildRequest(chat);
+            HttpHeaders headers = builder.buildHeaders(providerConfig.getApiKey());
+            HttpEntity<Object> httpEntity = new HttpEntity<>(request, headers);
+
+            AIResponse aiResponse = (AIResponse) restTemplate.postForObject(
+                    providerConfig.getApiURL(),
+                    httpEntity,
+                    builder.getResponseType()
+            );
             log.info(chat.getPromptRequest().getText());
             log.info(chat.getPromptRequest().generatePrompt(chat.getPromptConfiguration()));
-            if(Objects.nonNull(chatResponse) && Objects.nonNull(chatResponse.getChoices())){
-                Message message = chatResponse.getChoices().get(0).getMessage();
-                if(Objects.nonNull(message)){
+            if(Objects.nonNull(aiResponse)){
+                String content = aiResponse.getContent();
+                if(Objects.nonNull(content)){
+                    String sanitizedContent = sanitizeJsonContent(content);
 
                     PromptRequest promptRequest = chat.getPromptRequest();
-                    QuizRequest quizRequest = objectMapper.readValue(message.getContent(), QuizRequest.class);
+                    QuizRequest quizRequest = objectMapper.readValue(sanitizedContent, QuizRequest.class);
 
                     QuizGenerateResult quizGenerateResult = QuizGenerateResult.builder()
                             .quizRequest(quizRequest)
@@ -71,7 +91,7 @@ import java.util.stream.Collectors;
                     quizClient.updateQuiz(quizGenerateResult);
 
                     if (chat.getPromptRequest() instanceof VocabularyPromptRequest){
-                        this.generateWordSet(chat, chatResponse);
+                        this.generateWordSet(chat, sanitizedContent);
                     }
                 }
             }
@@ -82,12 +102,12 @@ import java.util.stream.Collectors;
     }
 
     @Override
-    public void generateWordSet(ChatRequest chat, ChatResponse chatResponse) {
+    public void generateWordSet(ChatRequest chat, String responseContent) {
         if (chat.getPromptRequest() instanceof VocabularyPromptRequest vocabularyPromptRequest){
             try{
                 String userId = SecurityContextHolder.getContext().getAuthentication().getName();
-                String stringResponse = chatResponse.getChoices().get(0).getMessage().getContent();
-                JsonNode jsonNode = objectMapper.readTree(stringResponse);
+                String sanitizedContent = sanitizeJsonContent(responseContent);
+                JsonNode jsonNode = objectMapper.readTree(sanitizedContent);
                 JsonNode wordNode = jsonNode.get("words");
                 List<WordRequest> wordRequests = new ArrayList<>();
 
@@ -131,6 +151,19 @@ import java.util.stream.Collectors;
             }
 
         }
+    }
+
+    private String sanitizeJsonContent(String content) {
+        if (content == null) {
+            return null;
+        }
+
+        String sanitized = content.trim();
+        sanitized = sanitized.replaceFirst("^```(?:json)?\\s*", "");
+        sanitized = sanitized.replaceFirst("^``(?:json)?\\s*", "");
+        sanitized = sanitized.replaceFirst("^`(?:json)?\\s*", "");
+        sanitized = sanitized.replaceFirst("\\s*```$", "");
+        return sanitized.trim();
     }
 
      public void setSecurityContextFromHeaders(String userId) {

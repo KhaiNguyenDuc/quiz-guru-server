@@ -39,7 +39,7 @@ public class QuizController {
             SimpMessageHeaderAccessor headerAccessor
     ){
         String userId = (String) headerAccessor.getSessionAttributes().get("user"); // Retrieve the user ID
-        log.error("Current User ID: " + userId);
+        log.info("Current User ID: " + userId);
         SubmitRecordResponse submitRecordResponse = quizService.submitRecord(recordRequest, userId);
         return new ResponseEntity<>(new ApiResponse<>(submitRecordResponse, "success"), HttpStatus.OK);
     }
