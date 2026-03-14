@@ -7,7 +7,7 @@ services:
     environment:
       - MYSQL_ROOT_PASSWORD
     ports:
-      - "3305:3306"
+      - "3306:3306"
     volumes:
       - ./init-scripts:/docker-entrypoint-initdb.d # Mount init scripts
     healthcheck:
@@ -43,7 +43,7 @@ services:
       - KC_DB_PASSWORD
       - KC_DB_URL
     ports:
-      - "7080:8080"
+      - "8080:8080"
     volumes:
       - ../../keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json
       - ../../keycloak/themes/quizguru/theme:/opt/keycloak/themes

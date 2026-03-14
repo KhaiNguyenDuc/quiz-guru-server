@@ -7,6 +7,6 @@ import org.springframework.amqp.core.MessageProperties;
 
 public interface GenerateService {
     void generateQuiz(ChatRequest chat, String userId);
-    void generateWordSet(ChatRequest chat, ChatResponse chatResponse);
+    void generateWordSet(ChatRequest chat, String content);
     void setSecurityContextFromHeaders(String userId);
 }

@@ -1,11 +1,8 @@
-DROP DATABASE IF EXISTS quizguru_library;
-CREATE DATABASE quizguru_library;
-
 USE quizguru_library;
 
 DROP TABLE IF EXISTS words;
 DROP TABLE IF EXISTS word_sets;
-DROP TABLE IF EXISTS library;
+DROP TABLE IF EXISTS libraries;
 
 CREATE TABLE libraries (
     id CHAR(36) PRIMARY KEY,

@@ -21,12 +21,7 @@ public class GenerateApplication {
 	}
 
 	@Bean
-	public RestTemplate template(@Qualifier("generateProperties") GenerateProperties configuration){
-		RestTemplate restTemplate=new RestTemplate();
-		restTemplate.getInterceptors().add((request, body, execution) -> {
-			request.getHeaders().add("Authorization", "Bearer " + configuration.getApiKey());
-			return execution.execute(request, body);
-		});
-		return restTemplate;
+	public RestTemplate template(){
+		return new RestTemplate();
 	}
 }

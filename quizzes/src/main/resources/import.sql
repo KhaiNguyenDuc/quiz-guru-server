@@ -1,6 +1,3 @@
-DROP DATABASE IF EXISTS quizguru_quiz;
-CREATE DATABASE quizguru_quiz;
-
 USE quizguru_quiz;
 
 DROP TABLE IF EXISTS choices;

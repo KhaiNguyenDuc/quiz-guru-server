@@ -28,6 +28,8 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(grantedAuthoritiesExtractor())))
                 .authorizeHttpRequests(requests -> requests
+                        .requestMatchers("/quizzes/ws-endpoint", "/quizzes/ws-endpoint/**").permitAll()
+                        .requestMatchers("/quizzes/internal/**").permitAll()
                         .requestMatchers("/api/v1/quizzes/**").hasRole("USER")
                         .requestMatchers("/quizzes/**").hasRole("USER")
                         .anyRequest().permitAll()
