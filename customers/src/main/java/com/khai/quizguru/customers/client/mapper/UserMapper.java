@@ -1,4 +1,4 @@
-package com.khai.quizguru.customers.mapper;
+package com.khai.quizguru.customers.client.mapper;
 
 import com.khai.quizguru.customers.dto.response.UserResponse;
 import org.keycloak.admin.client.resource.UserResource;
