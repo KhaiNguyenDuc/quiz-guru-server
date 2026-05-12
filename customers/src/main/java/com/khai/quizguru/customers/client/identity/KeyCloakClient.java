@@ -67,7 +67,7 @@ public class KeyCloakClient implements IdentityClient {
             userResource.roles().realmLevel().add(Collections.singletonList(guestRealmRole));
             return userId;
         } catch (jakarta.ws.rs.NotFoundException e) {
-            throw new IllegalStateException("User account created but role configuration failed.");
+            throw new IllegalStateException("User account created but role configuration failed");
         }
     }
 

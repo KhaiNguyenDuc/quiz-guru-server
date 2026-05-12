@@ -31,7 +31,7 @@ public class CustomerServiceImpl implements CustomerService {
             String email = registerCredentials.email();
             return new RegisterResponse(userId, username, email);
         } catch (IllegalStateException | IllegalArgumentException e) {
-            throw new ResourceNotFoundException(Constant.ERROR_CODE.UNAUTHORIZED_INTERNAL_ERROR);
+            throw new ResourceNotFoundException(Constant.ERROR_CODE.UNAUTHORIZED_INTERNAL_ERROR, e.getMessage());
         }
     }
 
@@ -40,7 +40,7 @@ public class CustomerServiceImpl implements CustomerService {
         try {
             return identityClient.getUserRoles(userId);
         } catch(IllegalArgumentException e){
-            throw new ResourceNotFoundException(Constant.ERROR_CODE.UNAUTHORIZED_INTERNAL_ERROR, userId);
+            throw new ResourceNotFoundException(Constant.ERROR_CODE.UNAUTHORIZED_INTERNAL_ERROR, e.getMessage());
         }
     }
 
