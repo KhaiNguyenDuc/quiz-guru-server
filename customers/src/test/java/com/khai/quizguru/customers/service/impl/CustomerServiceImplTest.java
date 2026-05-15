@@ -4,6 +4,8 @@ import com.khai.quizguru.customers.client.identity.IdentityClient;
 import com.khai.quizguru.customers.dto.request.CustomerUpdateRequest;
 import com.khai.quizguru.customers.dto.request.RegisterCredentials;
 import com.khai.quizguru.customers.dto.response.RegisterResponse;
+import com.khai.quizguru.customers.dto.response.UserResponse;
+import com.khai.quizguru.customers.exception.AccessDeniedException;
 import com.khai.quizguru.customers.exception.ResourceNotFoundException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,17 +35,28 @@ class CustomerServiceImplTest {
     private CustomerServiceImpl customerService;
     private RegisterCredentials credentials;
     private CustomerUpdateRequest customerUpdateRequest;
+    private UserResponse userResponse;
     private MockedStatic<SecurityContextHolder> mockedSecurityContextHolder;
     private final String userId = "98765432-1234-abcd-efgh-567890abcdef";
     private final String UNAUTHORIZED_ERROR_MESSAGE = "Can't authorize the user due to internal error";
 
     @BeforeEach
-    void setup(){
+    void setup() {
+
         customerService = new CustomerServiceImpl(identityClient);
-        credentials = new RegisterCredentials("johndoe", "john@example.com", "password123");
+        credentials = RegisterCredentials.builder().email("john@example.com").password("password").username("john").build();
+        userResponse = UserResponse.builder().id(userId).email("john@example.com").username("john").roles(List.of("USER", "ADMIN")).imagePath("example").build();
         customerUpdateRequest = new CustomerUpdateRequest(userId, "john", "example", "John");
         mockedSecurityContextHolder = mockStatic(SecurityContextHolder.class);
 
+    }
+
+    private void mockSecurityContext(String authenticatedUserId) {
+        SecurityContext securityContext = mock(SecurityContext.class);
+        Authentication authentication = mock(Authentication.class);
+        mockedSecurityContextHolder.when(SecurityContextHolder::getContext).thenReturn(securityContext);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.getName()).thenReturn(authenticatedUserId);
     }
 
     @AfterEach
@@ -52,7 +65,7 @@ class CustomerServiceImplTest {
     }
 
     @Test
-    void createUser_ShouldReturnCorrectlyRegisterResponse_WhenSuccessful(){
+    void createUser_ShouldReturnCorrectlyRegisterResponse_WhenSuccessful() {
 
         // Given
         when(identityClient.createUser(credentials)).thenReturn(userId);
@@ -77,10 +90,7 @@ class CustomerServiceImplTest {
                 .thenThrow(new IllegalArgumentException(errorMessage));
 
         // When & Then
-        ResourceNotFoundException exception = assertThrows(
-                ResourceNotFoundException.class,
-                () -> customerService.createUser(credentials)
-        );
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> customerService.createUser(credentials));
         assertEquals(UNAUTHORIZED_ERROR_MESSAGE + " " + errorMessage, exception.getMessage());
     }
 
@@ -89,14 +99,10 @@ class CustomerServiceImplTest {
 
         // Given
         String errorMessage = "Failed to communicate with Identity Provider";
-        when(identityClient.createUser(credentials))
-                .thenThrow(new IllegalStateException(errorMessage));
+        when(identityClient.createUser(credentials)).thenThrow(new IllegalStateException(errorMessage));
 
         // When & Then
-        ResourceNotFoundException exception = assertThrows(
-                ResourceNotFoundException.class,
-                () -> customerService.createUser(credentials)
-        );
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> customerService.createUser(credentials));
         assertEquals(UNAUTHORIZED_ERROR_MESSAGE + " " + errorMessage, exception.getMessage());
     }
 
@@ -105,19 +111,15 @@ class CustomerServiceImplTest {
 
         // Given
         String errorMessage = "User account created but role configuration failed";
-        when(identityClient.createUser(credentials))
-                .thenThrow(new IllegalStateException(errorMessage));
+        when(identityClient.createUser(credentials)).thenThrow(new IllegalStateException(errorMessage));
 
         // When & Then
-        ResourceNotFoundException exception = assertThrows(
-                ResourceNotFoundException.class,
-                () -> customerService.createUser(credentials)
-        );
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> customerService.createUser(credentials));
         assertEquals(UNAUTHORIZED_ERROR_MESSAGE + " " + errorMessage, exception.getMessage());
     }
 
     @Test
-    void findRoleFromUserId_ShouldReturnListRole_WhenSuccessful(){
+    void findRoleFromUserId_ShouldReturnListRole_WhenSuccessful() {
 
         //Given
         List<String> mockRoles = new ArrayList<>(List.of("USER", "ADMIN"));
@@ -132,30 +134,74 @@ class CustomerServiceImplTest {
     }
 
     @Test
-    void findRoleFromUserId_ShouldThrowException_WhenUserNotFound(){
+    void findRoleFromUserId_ShouldThrowException_WhenUserNotFound() {
 
         //Given
         String errorMessage = "User not found in Identity Provider";
         when(identityClient.getUserRoles(userId)).thenThrow(new IllegalArgumentException(errorMessage));
 
         // When & Then
-        ResourceNotFoundException exception = assertThrows(
-                ResourceNotFoundException.class,
-                () -> customerService.findRoleFromUserId(userId)
-        );
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> customerService.findRoleFromUserId(userId));
 
         assertEquals(UNAUTHORIZED_ERROR_MESSAGE + " " + errorMessage, exception.getMessage());
     }
 
     @Test
-    void updateCustomer_ShouldSucceed_WhenUserExists(){
+    void findById_ShouldSucceed_WhenUserExists() {
 
         // Given
-        SecurityContext securityContext = mock(SecurityContext.class);
-        Authentication authentication = mock(Authentication.class);
-        mockedSecurityContextHolder.when(SecurityContextHolder::getContext).thenReturn(securityContext);
-        when(securityContext.getAuthentication()).thenReturn(authentication);
-        when(authentication.getName()).thenReturn(userId);
+        mockSecurityContext(userId);
+        when(identityClient.getUserResponseById(userId)).thenReturn(userResponse);
+
+        // When
+        UserResponse result = customerService.findById(userId);
+
+        // Then
+        assertNotNull(result);
+        assertEquals(result.email(), userResponse.email());
+        assertEquals(result.id(), userResponse.id());
+        assertEquals(result.username(), userResponse.username());
+        assertEquals(result.roles(), userResponse.roles());
+        assertEquals(result.imagePath(), userResponse.imagePath());
+        verify(identityClient, times(1)).getUserResponseById(userId);
+
+    }
+
+    @Test
+    void findById_ShouldThrowException_WhenUserIdMissMatched() {
+
+        // Given
+        String anotherUserId = "testId";
+        String errorMessage = String.format("You don't have permission to access this user with %s", userId);
+        mockSecurityContext(anotherUserId);
+
+        // When & Then
+        AccessDeniedException exception = assertThrows(AccessDeniedException.class, () -> customerService.findById(userId));
+
+        assertEquals(errorMessage, exception.getMessage());
+
+    }
+
+    @Test
+    void findById_ShouldThrowException_WhenUserNotExists() {
+
+        // Given
+        String errorMessage = String.format("User with id %s not exist", userId);
+        mockSecurityContext(userId);
+        when(identityClient.getUserResponseById(userId)).thenThrow(new IllegalArgumentException(errorMessage));
+
+        // When & Then
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> customerService.findById(userId));
+
+        assertEquals(errorMessage, exception.getMessage());
+
+    }
+
+    @Test
+    void updateCustomer_ShouldSucceed_WhenUserExists() {
+
+        // Given
+        mockSecurityContext(userId);
         UserRepresentation userRepresentation = new UserRepresentation();
         when(identityClient.getUserRepresentationById(userId)).thenReturn(userRepresentation);
 
@@ -172,23 +218,15 @@ class CustomerServiceImplTest {
     }
 
     @Test
-    void updateCustomer_ShouldThrowException_WhenIdDoesNotExistInIdentityClient(){
+    void updateCustomer_ShouldThrowException_WhenIdDoesNotExistInIdentityClient() {
 
         // Given
-        SecurityContext securityContext = mock(SecurityContext.class);
-        Authentication authentication = mock(Authentication.class);
-        mockedSecurityContextHolder.when(SecurityContextHolder::getContext).thenReturn(securityContext);
-        when(securityContext.getAuthentication()).thenReturn(authentication);
-        when(authentication.getName()).thenReturn(userId);
         String errorMessage = "User not found in Identity Provider";
-        when(identityClient.getUserRepresentationById(userId))
-                .thenThrow(new IllegalArgumentException(errorMessage));
+        mockSecurityContext(userId);
+        when(identityClient.getUserRepresentationById(userId)).thenThrow(new IllegalArgumentException(errorMessage));
 
         // When & Then
-        ResourceNotFoundException exception = assertThrows(
-                ResourceNotFoundException.class,
-                () -> customerService.updateCustomer(customerUpdateRequest)
-        );
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> customerService.updateCustomer(customerUpdateRequest));
         assertEquals("User with id " + userId + " not exist", exception.getMessage());
         verify(identityClient, never()).updateUserResource(any(), anyString());
     }
