@@ -1,4 +1,4 @@
-package com.quizguru.quizzes.quizmanagement.infrastructure.adapter.in.web;
+package com.quizguru.quizzes.quizmanagement.infrastructure.adapter.in.web.request;
 
 import org.springframework.web.multipart.MultipartFile;
 

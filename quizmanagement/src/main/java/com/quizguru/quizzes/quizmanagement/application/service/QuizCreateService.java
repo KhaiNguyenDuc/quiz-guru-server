@@ -3,21 +3,21 @@ package com.quizguru.quizzes.quizmanagement.application.service;
 import com.quizguru.quizzes.quizmanagement.application.port.in.textquiz.create.CreateTextQuizCommand;
 import com.quizguru.quizzes.quizmanagement.application.port.in.textquiz.create.CreateTextQuizResult;
 import com.quizguru.quizzes.quizmanagement.application.port.in.textquiz.create.CreateTextQuizUseCase;
-import com.quizguru.quizzes.quizmanagement.application.port.out.AIProviderPort;
-import com.quizguru.quizzes.quizmanagement.application.port.out.GenerateQuizPrompt;
+import com.quizguru.quizzes.quizmanagement.application.port.out.GenerateTextQuizPrompt;
+import com.quizguru.quizzes.quizmanagement.application.port.out.QuizEventPublisherPort;
 import com.quizguru.quizzes.quizmanagement.application.port.out.QuizPersistencePort;
 import com.quizguru.quizzes.quizmanagement.domain.model.Quiz;
 import com.quizguru.quizzes.quizmanagement.domain.model.enums.Level;
 import com.quizguru.quizzes.quizmanagement.domain.model.enums.QuizType;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
-@Component
+@Service
 @RequiredArgsConstructor
 public class QuizCreateService implements CreateTextQuizUseCase {
 
     private final QuizPersistencePort quizPersistencePort;
-    private final AIProviderPort aiProviderPort;
+    private final QuizEventPublisherPort quizEventPublisherPort;
 
     @Override
     public CreateTextQuizResult create(CreateTextQuizCommand command) {
@@ -34,9 +34,9 @@ public class QuizCreateService implements CreateTextQuizUseCase {
 
         Quiz quizSaved = quizPersistencePort.save(quiz);
 
-        GenerateQuizPrompt aiPrompt = GenerateQuizPrompt.fromDomain(quizSaved);
+        GenerateTextQuizPrompt prompt = GenerateTextQuizPrompt.fromDomain(quizSaved);
 
-        aiProviderPort.generateQuiz(aiPrompt);
+        quizEventPublisherPort.publishQuizGenerationRequest(prompt);
         return CreateTextQuizResult.fromDomain(quizSaved);
     }
 }

@@ -1,7 +1,11 @@
-package com.quizguru.quizzes.quizmanagement.infrastructure.adapter.in.web;
+package com.quizguru.quizzes.quizmanagement.infrastructure.adapter.in.web.controller;
 
 import com.quizguru.quizzes.quizmanagement.application.port.in.textquiz.create.CreateTextQuizCommand;
 import com.quizguru.quizzes.quizmanagement.application.port.in.textquiz.create.CreateTextQuizUseCase;
+import com.quizguru.quizzes.quizmanagement.infrastructure.adapter.in.web.response.ApiResponse;
+import com.quizguru.quizzes.quizmanagement.infrastructure.adapter.in.web.response.GenerateQuizResponse;
+import com.quizguru.quizzes.quizmanagement.infrastructure.adapter.in.web.request.TextQuizRawWebRequest;
+import com.quizguru.quizzes.quizmanagement.infrastructure.adapter.in.web.mapping.TextQuizWebMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

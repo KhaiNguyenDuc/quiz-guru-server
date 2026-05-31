@@ -1,4 +1,4 @@
-package com.quizguru.quizzes.quizmanagement.infrastructure.adapter.in.web;
+package com.quizguru.quizzes.quizmanagement.infrastructure.adapter.in.web.response;
 
 import com.quizguru.quizzes.quizmanagement.domain.model.enums.Level;
 import com.quizguru.quizzes.quizmanagement.domain.model.enums.QuizType;

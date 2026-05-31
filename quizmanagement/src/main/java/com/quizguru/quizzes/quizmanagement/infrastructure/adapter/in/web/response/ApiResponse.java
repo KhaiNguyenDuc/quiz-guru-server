@@ -1,4 +1,4 @@
-package com.quizguru.quizzes.quizmanagement.infrastructure.adapter.in.web;
+package com.quizguru.quizzes.quizmanagement.infrastructure.adapter.in.web.response;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
