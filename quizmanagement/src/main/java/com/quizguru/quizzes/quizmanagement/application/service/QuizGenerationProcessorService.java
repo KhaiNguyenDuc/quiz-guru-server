@@ -4,14 +4,19 @@ import com.quizguru.quizzes.quizmanagement.application.port.in.consumer.Generati
 import com.quizguru.quizzes.quizmanagement.application.port.in.consumer.GenerationTextQuizUseCase;
 import com.quizguru.quizzes.quizmanagement.application.port.out.AIProviderPort;
 import com.quizguru.quizzes.quizmanagement.application.port.out.GenerateTextQuizPrompt;
+import com.quizguru.quizzes.quizmanagement.application.port.out.QuizPersistencePort;
+import com.quizguru.quizzes.quizmanagement.domain.model.Question;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class QuizGenerationProcessorService implements GenerationTextQuizUseCase {
 
     private final AIProviderPort aiProviderPort;
+    private final QuizPersistencePort quizPersistencePort;
 
     @Override
     public void process(GenerationTextQuizCommand command) {
@@ -26,6 +31,7 @@ public class QuizGenerationProcessorService implements GenerationTextQuizUseCase
                 .level(command.level())
                 .duration(command.duration())
                 .build();
-        aiProviderPort.generateQuiz(generateTextQuizPrompt);
+        List<Question> questions = aiProviderPort.generateQuiz(generateTextQuizPrompt);
+        quizPersistencePort.updateQuiz(command.quizId(), questions);
     }
 }

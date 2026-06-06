@@ -1,12 +1,10 @@
 package com.quizguru.quizzes.quizmanagement.domain.model;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
 import java.io.Serializable;
 
-@Getter
-@Setter
+@Data
 public class Choice implements Serializable {
 
     private String id;

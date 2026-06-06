@@ -13,13 +13,13 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class RabbitMqQuizListenerAdapter {
 
-    private final GenerationTextQuizUseCase processQuizGenerationUseCase;
+    private final GenerationTextQuizUseCase generationTextQuizUseCase;
 
     @RabbitListener(queues = "#{amqpProperties.queues.generation}" )
     public void generateQuizByTextConsumer(GenerateTextQuizPrompt generateTextQuizPrompt){
 
         GenerationTextQuizCommand generationTextQuizCommand = GenerationTextQuizCommand.fromPrompt(generateTextQuizPrompt);
 
-        processQuizGenerationUseCase.process(generationTextQuizCommand);
+        generationTextQuizUseCase.process(generationTextQuizCommand);
     }
 }

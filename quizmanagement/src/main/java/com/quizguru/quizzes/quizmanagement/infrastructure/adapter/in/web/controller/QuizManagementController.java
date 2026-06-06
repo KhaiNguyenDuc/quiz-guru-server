@@ -1,6 +1,7 @@
 package com.quizguru.quizzes.quizmanagement.infrastructure.adapter.in.web.controller;
 
 import com.quizguru.quizzes.quizmanagement.application.port.in.textquiz.create.CreateTextQuizCommand;
+import com.quizguru.quizzes.quizmanagement.application.port.in.textquiz.create.CreateTextQuizResult;
 import com.quizguru.quizzes.quizmanagement.application.port.in.textquiz.create.CreateTextQuizUseCase;
 import com.quizguru.quizzes.quizmanagement.infrastructure.adapter.in.web.response.ApiResponse;
 import com.quizguru.quizzes.quizmanagement.infrastructure.adapter.in.web.response.GenerateQuizResponse;
@@ -33,8 +34,10 @@ public class QuizManagementController {
                 textQuizRawWebRequest.htmlContext()
         );
 
+        CreateTextQuizResult createTextQuizResult = createTextQuizUseCase.create(command);
+
         GenerateQuizResponse responseData =
-                TextQuizWebMapper.mapToWebResponse(createTextQuizUseCase.create(command));
+                TextQuizWebMapper.mapToWebResponse(createTextQuizResult);
 
         return ApiResponse.created(responseData, "Quiz generated successfully");
     }
