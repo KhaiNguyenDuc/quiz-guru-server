@@ -3,9 +3,7 @@ package com.quizguru.quizzes.quizmanagement.domain.model;
 import com.quizguru.quizzes.quizmanagement.domain.model.enums.Level;
 import com.quizguru.quizzes.quizmanagement.domain.model.enums.QuizType;
 import lombok.*;
-
 import java.io.Serializable;
-import java.time.Instant;
 import java.util.List;
 
 @Getter
@@ -24,7 +22,7 @@ public class Quiz implements Serializable {
     private Boolean isDeleted;
 
 
-    @Builder(builderMethodName = "create")
+    @Builder(builderMethodName = "create", builderClassName = "CreateBuilder")
     private Quiz(String userId, Integer number, Integer duration, Level level, QuizType quizType, String language, String givenText) {
         this.userId = userId;
         this.number = number;
@@ -35,7 +33,7 @@ public class Quiz implements Serializable {
         this.givenText = givenText;
     }
 
-    @Builder(builderMethodName = "reconstitute")
+    @Builder(builderMethodName = "reconstitute", builderClassName = "ReconstituteBuilder")
     private Quiz(String quizId, String userId, Integer number, Integer duration, Level level, QuizType quizType, String language, String givenText, List<Question> questions) {
         this.quizId = quizId;
         this.userId = userId;

@@ -1,6 +1,5 @@
-USE quizguru_quiz;
+USE quizguru;
 
--- Drop children before parents to avoid FK constraint errors on re-run
 DROP TABLE IF EXISTS record_item_choice;
 DROP TABLE IF EXISTS record_item;
 DROP TABLE IF EXISTS records;

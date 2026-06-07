@@ -1,5 +1,8 @@
 package com.quizguru.quizzes.quizmanagement.application.port.in.textquiz.create;
 
+import lombok.Builder;
+
+@Builder
 public record CreateTextQuizCommand(
         String userId,
         String quizType,

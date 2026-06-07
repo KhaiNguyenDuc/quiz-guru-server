@@ -1,0 +1,73 @@
+server:
+  port: 8083
+
+spring:
+  profiles:
+    # Remove this line (or set to a different value) to use the real GeminiAdapter.
+    active: mock
+  jpa:
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+    show-sql: true
+  datasource:
+    url: jdbc:mysql://localhost:3306/quizguru
+    username: root
+    password: k989898k
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  sql:
+    init:
+      mode: always
+  rabbitmq:
+    host: localhost
+    port: 5672
+    password: guest
+    username: guest
+    listener:
+      simple:
+        default-requeue-rejected: false
+        retry:
+          enabled: true
+          max-attempts: 3
+          initial-interval: 2000
+          multiplier: 2
+          max-interval: 10000
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://localhost:8080/realms/Quizguru/protocol/openid-connect/certs
+
+amqp:
+  exchanges:
+    internal: internal.exchange
+  queues:
+    generation: generation.queue
+    text-vocab: text-vocab.queue
+    file-vocab: file-vocab.queue
+    list-vocab: list-vocab.queue
+  routing-keys:
+    internal-generation: internal.generation.routing-key
+    internal-text-vocab: internal.text-vocab.routing-key
+    internal-list-vocab: internal.list-vocab.routing-key
+    internal-file-vocab: internal.file-vocab.routing-key
+
+generate:
+  providers:
+    openai:
+      model: gpt-3.5-turbo
+      apiKey: '{cipher}7366718b1eb92e85d45670230dd34810be76e77fa36856d2a6a811d38c5064a5f53e767da1ed55fe3a5148341e4b2bd4daf29225ac636f9e7ead4ad42795b97fa23d39b5aaceac6071c2a4c13f792f9b'
+      apiURL: 'https://api.openai.com/v1/chat/completions'
+    gemini:
+      model: gemini-2.5-flash
+      apiKey: 'NothingHere'
+      apiURL: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent'
+
+prompt:
+  singleChoiceQuizPrompt: "Give me exactly %d questions of type %s about the given text which has the level %s. Return your answer entirely in the form of a JSON object. The JSON object must have a key named \"questions\" which is an array of the questions. Each quiz question should include exactly 4 choices, the answers, and a brief explanation of why the answer is correct. Don't include anything other than the JSON. The JSON properties of each question should be \"query\" (which is the question), \"choices\", \"answers\", \"type\"( \"MULTIPLE_CHOICE\" or \"SINGLE_CHOICE\") and \"explanation\". The choices shouldn't have any ordinal value like A, B, C, D or a number like 1, 2, 3, 4. The answer should be an array include the 0-indexed number of the correct choice. The json Object will returned in %s language"
+  multipleChoiceQuizPrompt: "Provide exactly %d questions of type %s based on the given text, with a difficulty level of %s. Return your response in the form of a JSON object. The JSON object should contain a key named \"questions,\" which is an array of the questions. Each multiple-choice question should have exactly 4 choices, answers, and a brief explanation of why the answers are correct. There must have more than 1 choice corrected, paraphrase the other choice to replicate as many correct choice as possible. The JSON properties of each question should include \"query\" (the question), \"choices,\" \"answers,\" ( always has size more than 1 ), \"type\" (use \"MULTIPLE_CHOICE\" for questions with more than 1 correct choice), and \"explanation.\" Ensure that the choices do not have any ordinal values like A, B, C, D, or numerical values like 1, 2, 3, 4. The answers should be an array including the 0-indexed numbers of correct choices. The JSON object will be returned in %s language."
+  mixChoiceQuizPrompt: "Give me exactly %d questions of type %s about the given text which has the level %s. Return your answer entirely in the form of a JSON object. The JSON object must have a key named \"questions\" which is an array of the questions. Each quiz question should include exactly 4 choices, the answers, and a brief explanation of why the answers is correct. Don't include anything other than the JSON. The JSON properties of each question should be \"query\" (which is the question), \"choices\", \"answers\", \"type\"( \"MULTIPLE_CHOICE\" for question has more than 1 correct choice or \"SINGLE_CHOICE\" for question has only 1 correct choice) and \"explanation\". The choices shouldn't have any ordinal value like A, B, C, D or a number like 1, 2, 3, 4. The answer should be the 0-indexed number of the correct choice. The json Object will returned in %s language"
+  vocabularyQuizPrompt: "Provide exactly %d questions of type %s based on the given vocabulary, the purpose is to help user learn about those vocabularies with a difficulty level of %s, Create the questions switching between: 1. Cloze question - embedded answer. 2. The question about detail definition of that word. 3. The question using that word in real life Return your response in the form of a JSON object. The JSON object should contain a key named \"words\" which is an array of given vocabularies, a key named \"questions,\" which is an array of the questions. Each multiple-choice question should have exactly 4 choices, answers, and a brief explanation of why the answers are correct. There must have more than 1 choice corrected, paraphrase the other choice to replicate as many correct choice as possible. The JSON properties of each question should include \"query\" (the question), \"choices,\" \"answers,\", \"type\" (\"MULTIPLE_CHOICE\" for questions with more than 1 correct choice or \"SINGLE_CHOICE\" for questions with only 1 correct choice), and \"explanation.\" Ensure that the choices do not have any ordinal values like A, B, C, D, or numerical values like 1, 2, 3, 4. The answers should be an array including the 0-indexed numbers of correct choices. The JSON object will be returned in %s language."
+  textToVocabPrompt: "Provide exactly %d questions of type %s based on the given vocabularies you found in the given text which has the level of %s, the vocabularies should be a single word the purpose is to help user learn about those vocabularies contain in the text, the questions should not relate to the given text but relate to the vocabularies itself Create the questions switching between: 1. Cloze question - embedded answer. 2. The question about detail definition of that word. 3. The question using that word in real life Return your response in the form of a JSON object. The JSON object should contain a key named \"words\" which is an array of vocabularies you found in the given text a key named \"questions,\" which is an array of the questions. Each multiple-choice question should have exactly 4 choices, answers, and a brief explanation of why the answers are correct. There must have more than 1 choice corrected, paraphrase the other choice to replicate as many correct choice as possible. The JSON properties of each question should include \"query\" (the question), \"choices,\" \"answers,\", \"type\" (\"MULTIPLE_CHOICE\" for questions with more than 1 correct choice or \"SINGLE_CHOICE\" for questions with only 1 correct choice), and \"explanation.\" Ensure that the choices do not have any ordinal values like A, B, C, D, or numerical values like 1, 2, 3, 4. The answers should be an array including the 0-indexed numbers of correct choices.  The JSON object will be returned in %s language."

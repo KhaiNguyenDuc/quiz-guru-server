@@ -23,21 +23,12 @@ public class QuizManagementController {
             @RequestHeader("X-User-Id") String userId,
             @RequestBody TextQuizRawWebRequest textQuizRawWebRequest
     ){
-        CreateTextQuizCommand command = new CreateTextQuizCommand(
-                userId,
-                textQuizRawWebRequest.type(),
-                textQuizRawWebRequest.number(),
-                textQuizRawWebRequest.language(),
-                textQuizRawWebRequest.level(),
-                textQuizRawWebRequest.duration(),
-                textQuizRawWebRequest.content(),
-                textQuizRawWebRequest.htmlContext()
-        );
+        CreateTextQuizCommand command = TextQuizWebMapper.toCommand(userId, textQuizRawWebRequest);
 
         CreateTextQuizResult createTextQuizResult = createTextQuizUseCase.create(command);
 
         GenerateQuizResponse responseData =
-                TextQuizWebMapper.mapToWebResponse(createTextQuizResult);
+                TextQuizWebMapper.toResponse(createTextQuizResult);
 
         return ApiResponse.created(responseData, "Quiz generated successfully");
     }
